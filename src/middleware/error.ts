@@ -6,7 +6,7 @@ const localLogger = createLogger('@error')
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
     localLogger.error(err)
-    if(err instanceof RequestError) {
+    if (err instanceof RequestError) {
         res.status(err.statusCode).send({
             success: false,
             error: {

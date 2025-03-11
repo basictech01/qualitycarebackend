@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS branch (
 );
 
 CREATE TABLE IF NOT EXISTS banner (
-    id INT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     image_english_url TEXT,
     image_arabic_url TEXT,
     link TEXT,

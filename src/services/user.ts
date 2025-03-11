@@ -29,7 +29,7 @@ export class UserService {
             connection = await pool.getConnection();
             await this.userRepository.checkIfUserExists(connection, email, phone_number, national_id);
             const otp = await this.smsRepository.sendOTP(phone_number);
-            const data =  {
+            const data = {
                 email,
                 password,
                 name,
@@ -64,8 +64,8 @@ export class UserService {
             }
             const password_hash = await this.encryptionRepository.hashPassword(data.password);
             const user = await this.userRepository.createUser(connection, data.email, password_hash, data.name, data.phone_number, data.national_id, data.photo_url);
-            const accessToken = await createAuthToken({ id: user.id, is_admin: user.is_admin });
-            const refreshToken = await createRefreshToken({ id: user.id, is_admin: user.is_admin });
+            const accessToken = createAuthToken({ id: user.id, is_admin: user.is_admin });
+            const refreshToken = createRefreshToken({ id: user.id, is_admin: user.is_admin });
             return {
                 full_name: user.full_name,
                 email_address: user.email_address,
@@ -87,7 +87,7 @@ export class UserService {
                 connection.release();
             }
         }
-        
+
     }
 
     async loginWithEmailPassword(email: string, password: string): Promise<AuthUser> {
@@ -127,5 +127,5 @@ export class UserService {
             }
         }
     }
-    
+
 }

@@ -25,29 +25,30 @@ require("dotenv").config();
 const logger = createLogger('@app')
 
 async function start() {
-  // Start server here
-  const app: Application = express()
-  app.use(bodyParser.json())
-  app.use(cors());
-  app.use(morgan('combined'))
+    // Start server here
+    const app: Application = express()
+    app.use(bodyParser.json())
+    app.use(cors());
+    app.use(morgan('combined'))
 
-  app.use('/user', user);
-  app.use('/service', service);
-  app.use('/doctor', doctor);
-  app.use('/booking', booking);
-  
-  app.use('/review', review);
-  app.use('/notification', notification);
-  app.use('/vat', vat);
-  app.use('/loyalty', loyalty);
-  app.use('/branch', branch);
-  app.use('/banner', banner);
-  app.use('/settings', settings);
+    app.use('/user', user);
 
-  app.use(errorHandler)
-  const server = app.listen(PORT, function () {
-      logger.info(`App is listening on port ${PORT} !`)
-  })
+    app.use('/service', service);
+    app.use('/doctor', doctor);
+    app.use('/booking', booking);
+
+    app.use('/review', review);
+    app.use('/notification', notification);
+    app.use('/vat', vat);
+    app.use('/loyalty', loyalty);
+    app.use('/branch', branch);
+    app.use('/banner', banner);
+    app.use('/settings', settings);
+
+    app.use(errorHandler)
+    const server = app.listen(PORT, function() {
+        logger.info(`App is listening on port ${PORT} !`)
+    })
 }
 
 start();

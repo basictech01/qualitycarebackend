@@ -5,9 +5,9 @@ import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 
 const logger = createLogger('@vatRepository')
 
-export default  class VatRepository {
+export default class VatRepository {
 
-    async updateVat (connection: PoolConnection, vat: number): Promise<number> {
+    async updateVat(connection: PoolConnection, vat: number): Promise<number> {
         try {
             const [result,] = await connection.query<ResultSetHeader>('UPDATE vat SET vat_percentage = ?', [vat]);
             return vat
@@ -17,7 +17,7 @@ export default  class VatRepository {
         }
     }
 
-    async getVat (connection: PoolConnection): Promise<number> {
+    async getVat(connection: PoolConnection): Promise<number> {
         try {
             const [vats,] = await connection.query<Vat[]>('SELECT * from vat limit 1');
             return vats[0].vat_percentage
@@ -26,5 +26,5 @@ export default  class VatRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
-} 
+}
 
