@@ -73,4 +73,20 @@ export default  class UserRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async getUserByPhone (connection: PoolConnection, phone_number: string): Promise<User> {
+        try {
+            const [users,] = await connection.query<User[]>('SELECT * from user where phone_number = ?', [phone_number]);
+            if (users.length === 0) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+            return users[0];
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }

@@ -25,6 +25,16 @@ const SCHEMA = {
     LOGIN_EMAIL: z.object({
         email_address: z.string().email().max(512),
         password: z.string().min(1)
+    }),
+    LOGIN_PHONE: z.object({
+        phone_number: z.string().min(1)
+    }),
+    LOGIN_VERIFY: z.object({
+        hash: z.string().min(1),
+        otp: z.number().min(1)
+    }),
+    REFRESH_TOKEN: z.object({
+        refresh_token: z.string().min(1)
     })
 }
 
@@ -65,9 +75,66 @@ router.post('/login_email',
     async function(req: Request, res: Response, next: NextFunction) {
         const body: z.infer<typeof SCHEMA.LOGIN_EMAIL> = req.body
         try {
-            console.log( body.email_address)
             const user = await userService.loginWithEmailPassword(body.email_address, body.password);
             res.send(successResponse(user));
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.post('/login_phone',
+    validateRequest({
+        body: SCHEMA.LOGIN_PHONE
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        const body: z.infer<typeof SCHEMA.LOGIN_PHONE> = req.body
+        try {
+            const user = await userService.loginWithPhone(body.phone_number);
+            res.send(successResponse(user));
+        }
+        catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.post('/login_phone_verify', 
+    validateRequest({
+        body: SCHEMA.LOGIN_VERIFY
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        const body: z.infer<typeof SCHEMA.LOGIN_VERIFY> = req.body
+        try {
+            const user = await userService.loginPhoneVerify(body.hash, body.otp);
+            res.send(successResponse(user));
+        }
+        catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.post('/refresh_token',
+    validateRequest({
+        body: SCHEMA.REFRESH_TOKEN
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const body: z.infer<typeof SCHEMA.REFRESH_TOKEN> = req.body
+            const user = await userService.refreshToken(body.refresh_token);
+            res.send(successResponse(user));
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.post('/upload_photo',
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            // TODO: implement this
+            res.send(successResponse(true));
         } catch(e) {
             next(e)
         }

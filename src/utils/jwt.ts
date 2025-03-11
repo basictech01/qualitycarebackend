@@ -27,10 +27,10 @@ export function decodeAuthToken(token: string) {
     return dec
 }
 
-export function decodeRefreshToken(token: string) {
+export function decodeRefreshToken(token: string): TokenData {
     const dec = jwt.verify(token, JWT_REFRESH_SECRET)
     if(typeof dec == 'string') {
         throw ERRORS.INVALID_REFRESH_TOKEN
     }
-    return dec
+    return dec as TokenData
 }
