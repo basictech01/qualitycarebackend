@@ -43,7 +43,7 @@ router.post('/register',
     }
 )
 
-router.post('/verify_user', 
+router.post('/verify_user',
     validateRequest({
         body: SCHEMA.VERIFY_USER
     }),

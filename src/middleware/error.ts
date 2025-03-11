@@ -14,7 +14,6 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
                 message: err.message
             }
         })
-
     } else {
         console.log(err)
         res.status(ERRORS.UNHANDLED_ERROR.statusCode).send({
