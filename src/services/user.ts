@@ -7,7 +7,7 @@ import { ERRORS, RequestError } from '@utils/error';
 import createLogger from '@utils/logger';
 import { PoolConnection } from 'mysql2/promise';
 import { AuthUser } from '@models/user';
-import { createAuthToken, createRefreshToken } from '@utils/jwt';
+import { createAuthToken, createRefreshToken, decodeRefreshToken } from '@utils/jwt';
 
 const logger = createLogger('@userService');
 
@@ -103,8 +103,8 @@ export class UserService {
             if (!isPasswordCorrect) {
                 throw ERRORS.USER_NOT_FOUND;
             }
-            const accessToken = await createAuthToken({ id: user.id, is_admin: user.is_admin });
-            const refreshToken = await createRefreshToken({ id: user.id, is_admin: user.is_admin });
+            const accessToken = createAuthToken({ id: user.id, is_admin: user.is_admin });
+            const refreshToken = createRefreshToken({ id: user.id, is_admin: user.is_admin });
             return {
                 full_name: user.full_name,
                 email_address: user.email_address,
@@ -128,4 +128,98 @@ export class UserService {
         }
     }
 
+    async loginWithPhone(phone_number: string): Promise<string> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const user = await this.userRepository.getUserByPhone(connection, phone_number);
+            if (!user) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+            const otp = await this.smsRepository.sendOTP(phone_number);
+            const data = {
+                phone_number,
+                otp
+            };
+            const encryptedData = await this.encryptionRepository.encryptJSON(data);
+            return encryptedData;
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async loginPhoneVerify(hash: string, otp: number): Promise<AuthUser> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const data = await this.encryptionRepository.decryptJSON(hash);
+            if (data.otp !== otp) {
+                throw ERRORS.INVALID_OTP;
+            }
+            const user = await this.userRepository.getUserByPhone(connection, data.phone_number);
+            if (!user) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+            const accessToken = createAuthToken({ id: user.id, is_admin: user.is_admin });
+            const refreshToken = createRefreshToken({ id: user.id, is_admin: user.is_admin });
+            return {
+                full_name: user.full_name,
+                email_address: user.email_address,
+                phone_number: user.phone_number,
+                national_id: user.national_id,
+                photo_url: user.photo_url,
+                access_token: accessToken,
+                refresh_token: refreshToken
+            }
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async refreshToken(refreshToken: string): Promise<AuthUser> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const payload = decodeRefreshToken(refreshToken);
+            const user = await this.userRepository.getUserById(connection, payload.id);
+            if (!user) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+            const accessToken = createAuthToken({ id: user.id, is_admin: user.is_admin });
+            return {
+                full_name: user.full_name,
+                email_address: user.email_address,
+                phone_number: user.phone_number,
+                national_id: user.national_id,
+                photo_url: user.photo_url,
+                access_token: accessToken,
+                refresh_token: refreshToken
+            }
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        }
+    }
 }
