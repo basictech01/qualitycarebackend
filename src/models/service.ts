@@ -14,6 +14,7 @@ CREATE TABLE service (
     maximum_booking_per_slot INT NOT NULL,
     service_image_en_url TEXT,
     service_image_ar_url TEXT,
+    can_redeem BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (category_id) REFERENCES categories(id)
 )`
 
@@ -45,6 +46,7 @@ export interface Service extends RowDataPacket {
     maximum_booking_per_slot: number;
     service_image_en_url: string;
     service_image_ar_url: string;
+    can_redeem: boolean;
 }
 
 export interface ServiceView {

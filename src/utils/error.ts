@@ -19,6 +19,8 @@ error code stating with 1 is common across all services
 error code starting with 2 is for user service flow
 error code starting with 3 is for service service flow
 error code starting with 4 is for doctor service flow
+error code starting with 5 is for booking service flow
+error code starting with 6 is for redeem service flow
 
 
 
@@ -65,4 +67,10 @@ export const ERRORS = {
     DOCTOR_NOT_FOUND: new RequestError("Doctor not found", 30004, 404),
     DOCTOR_BRANCH_NOT_FOUND: new RequestError("Doctor branch not found", 30005, 404),
     DOCTOR_TIME_SLOT_NOT_FOUND: new RequestError("Doctor time slot not found", 30006, 404),
+
+    BOOKING_NOT_FOUND: new RequestError("Booking not found", 50001, 404),
+    DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT: new RequestError("Doctor already booked for this slot", 50002, 400),
+
+    INSUFFICIENT_QPOINTS: new RequestError("Insufficient QPoints", 60001, 400),
+
 }

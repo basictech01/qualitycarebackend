@@ -23,6 +23,7 @@ const SCHEMA = {
         maximum_booking_per_slot: z.number(),
         service_image_en_url: z.string(),
         service_image_ar_url: z.string(),
+        can_redeem: z.boolean().default(false)
     }),
     UPDATE_SERVICE: z.object({
         name_en: z.string().optional(),
@@ -35,6 +36,7 @@ const SCHEMA = {
         maximum_booking_per_slot: z.number().optional(),
         service_image_en_url: z.string().optional(),
         service_image_ar_url: z.string().optional(),
+        can_redeem: z.boolean().optional()
     }),
     CREATE_SERVICE_CATEGORY: z.object({
         name_en: z.string(),
@@ -74,7 +76,7 @@ router.post('/',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const body: z.infer<typeof SCHEMA.CREATE_SERVICE> = req.body;
-            const service = await serviceService.create(body.name_en, body.name_ar, body.category_id, body.about_en, body.about_ar, body.actual_price, body.discounted_price, body.maximum_booking_per_slot, body.service_image_en_url, body.service_image_ar_url);
+            const service = await serviceService.create(body.name_en, body.name_ar, body.category_id, body.about_en, body.about_ar, body.actual_price, body.discounted_price, body.maximum_booking_per_slot, body.service_image_en_url, body.service_image_ar_url, body.can_redeem);
             res.json(service);
         } catch (error) {
             next(error);
@@ -91,7 +93,7 @@ router.put('/:service_id',
         try {
             const body: z.infer<typeof SCHEMA.UPDATE_SERVICE> = req.body;
             const service_id = parseInt(req.params.service_id);
-            const service = await serviceService.update(service_id, body.name_en, body.name_ar, body.category_id, body.about_en, body.about_ar, body.actual_price, body.discounted_price, body.maximum_booking_per_slot, body.service_image_en_url, body.service_image_ar_url);
+            const service = await serviceService.update(service_id, body.name_en, body.name_ar, body.category_id, body.about_en, body.about_ar, body.actual_price, body.discounted_price, body.maximum_booking_per_slot, body.service_image_en_url, body.service_image_ar_url, body.can_redeem);
             res.json(service);
         } catch (error) {
             next(error);
@@ -219,6 +221,19 @@ router.post('/branch',
             const body: z.infer<typeof SCHEMA.ADD_SERVICE_TO_BRANCH> = req.body;
             const branch = await serviceService.addServiceToBranch(body.service_id, body.branch_id);
             res.json(branch);
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
+// get all services that can be redeemed
+router.get('can_redeem',
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const service_id = parseInt(req.query.service_id as string);
+            const canRedeem = await serviceService.getRedeemableServices();
+            res.json(canRedeem);
         } catch (error) {
             next(error);
         }

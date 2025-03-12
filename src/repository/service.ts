@@ -74,9 +74,9 @@ export default class ServiceRepository {
         }
     }
 
-    async create(connection: PoolConnection, name_en: string, name_ar: string, category_id: number, about_en: string, about_ar: string, actual_price: number, discounted_price: number, maximum_booking_per_slot: number, service_image_en_url: string, service_image_ar_url: string): Promise<Service> {
+    async create(connection: PoolConnection, name_en: string, name_ar: string, category_id: number, about_en: string, about_ar: string, actual_price: number, discounted_price: number, maximum_booking_per_slot: number, service_image_en_url: string, service_image_ar_url: string, can_redeem: boolean): Promise<Service> {
         try {
-            const [result] = await connection.query<ResultSetHeader>('INSERT INTO service (name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url]);
+            const [result] = await connection.query<ResultSetHeader>('INSERT INTO service (name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url, can_redeem) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url, can_redeem]);
             const service = await this.getServiceById(connection, result.insertId);
             return service;
         } catch (error) {
@@ -89,11 +89,11 @@ export default class ServiceRepository {
         }
     }
 
-    async update(connection: PoolConnection, id: number, name_en: string, name_ar: string, category_id: number, about_en: string, about_ar: string, actual_price: number, discounted_price: number, maximum_booking_per_slot: number, service_image_en_url: string, service_image_ar_url: string): Promise<Service> {
+    async update(connection: PoolConnection, id: number, name_en: string, name_ar: string, category_id: number, about_en: string, about_ar: string, actual_price: number, discounted_price: number, maximum_booking_per_slot: number, service_image_en_url: string, service_image_ar_url: string, can_redeem: boolean): Promise<Service> {
         try {
             await connection.query<ResultSetHeader>(
-                'UPDATE service SET name_en = ?, name_ar = ?, category_id = ?, about_en = ?, about_ar = ?, actual_price = ?, discounted_price = ?, maximum_booking_per_slot = ?, service_image_en_url = ?, service_image_ar_url = ? WHERE id = ?',
-                [name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url, id]
+                'UPDATE service SET name_en = ?, name_ar = ?, category_id = ?, about_en = ?, about_ar = ?, actual_price = ?, discounted_price = ?, maximum_booking_per_slot = ?, service_image_en_url = ?, service_image_ar_url = ?, can_redeem = ? WHERE id = ?',
+                [name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url, can_redeem, id]
             );
             const updatedService = await this.getServiceById(connection, id);
             return updatedService;
@@ -185,6 +185,18 @@ export default class ServiceRepository {
             return services;
         } catch (error) {
             logger.error(`Error getting services for branch: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
+
+    async getRedeemableServices(connection: PoolConnection): Promise<Service[]> {
+        try {
+            const [services,] = await connection.query<Service[]>(
+                'SELECT * FROM service WHERE can_redeem = 1'
+            );
+            return services;
+        } catch (error) {
+            logger.error(`Error getting redeemable services: ${error}`);
             throw ERRORS.DATABASE_ERROR;
         }
     }

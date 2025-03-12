@@ -48,7 +48,7 @@ export default class SettingService {
         }
     }
 
-    async create(name_en: string, name_ar: string, category_id: number, about_en: string, about_ar: string, actual_price: number, discounted_price: number, maximum_booking_per_slot: number, service_image_en_url: string, service_image_ar_url: string): Promise<ServiceView> {
+    async create(name_en: string, name_ar: string, category_id: number, about_en: string, about_ar: string, actual_price: number, discounted_price: number, maximum_booking_per_slot: number, service_image_en_url: string, service_image_ar_url: string, can_redeem: boolean ): Promise<ServiceView> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -56,7 +56,7 @@ export default class SettingService {
             if (!service_category) {
                 throw ERRORS.INVALID_SERVICE_CATEGORY;
             }
-            const service = await this.serviceRepository.create(connection, name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url);
+            const service = await this.serviceRepository.create(connection, name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url, can_redeem);
             return createServiceView(service, service_category);
         } catch (error) {
             if (connection) {
@@ -71,7 +71,7 @@ export default class SettingService {
         }
     }
 
-    async update(id: number, name_en: string | undefined, name_ar: string | undefined, category_id: number | undefined, about_en: string | undefined, about_ar: string | undefined, actual_price: number | undefined, discounted_price: number | undefined, maximum_booking_per_slot: number | undefined, service_image_en_url: string | undefined, service_image_ar_url: string | undefined): Promise<ServiceView> {
+    async update(id: number, name_en: string | undefined, name_ar: string | undefined, category_id: number | undefined, about_en: string | undefined, about_ar: string | undefined, actual_price: number | undefined, discounted_price: number | undefined, maximum_booking_per_slot: number | undefined, service_image_en_url: string | undefined, service_image_ar_url: string | undefined, can_redeem: boolean | undefined): Promise<ServiceView> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -106,6 +106,9 @@ export default class SettingService {
             if(service_image_ar_url !== undefined) {
                 service.service_image_ar_url = service_image_ar_url;
             }
+            if(can_redeem !== undefined) {
+                service.can_redeem = can_redeem;
+            }
             
             let serviceCategory: ServiceCategory;
             if(category_id !== undefined) {
@@ -119,7 +122,7 @@ export default class SettingService {
                 serviceCategory = await this.serviceRepository.getServiceCategoryById(connection, service.category_id);
             }
 
-            const updatedService = await this.serviceRepository.update(connection, id, service.name_en, service.name_ar, service.category_id, service.about_en, service.about_ar, service.actual_price, service.discounted_price, service.maximum_booking_per_slot, service.service_image_en_url, service.service_image_ar_url);
+            const updatedService = await this.serviceRepository.update(connection, id, service.name_en, service.name_ar, service.category_id, service.about_en, service.about_ar, service.actual_price, service.discounted_price, service.maximum_booking_per_slot, service.service_image_en_url, service.service_image_ar_url, service.can_redeem);
             return createServiceView(updatedService, serviceCategory);
         } catch (error) {
             if (connection) {
@@ -295,6 +298,36 @@ export default class SettingService {
                 await connection.rollback();
             }
             logger.error(`Error adding service to branch: ${error}`);
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getRedeemableServices(): Promise<ServiceView[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const services = await this.serviceRepository.getRedeemableServices(connection);
+            const serviceCategory = await this.serviceRepository.getAllServicesCategories(connection);
+            let serviceCategoryMap = new Map<number, ServiceCategory>();
+            serviceCategory.forEach((category) => {
+                serviceCategoryMap.set(category.id, category);
+            });
+            const serviceViews: ServiceView[] = []
+            for (let i = 0; i < services.length; i++) {
+                const service = services[i];
+                const serviceCategory = serviceCategoryMap.get(service.category_id);
+                if (!serviceCategory) {
+                    continue;
+                }
+                serviceViews.push(createServiceView(service, serviceCategory));
+            }
+            return serviceViews;
+        } catch (error) {
+            logger.error(`Error getting redeemable services: ${error}`);
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {

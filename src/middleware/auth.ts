@@ -20,6 +20,8 @@ export const verifyClient: RequestHandler = (req: Request, res: Response, next: 
     }
     // @ts-ignore
     req.userID = decoded.id;
+    // @ts-ignore
+    req.isAdmin = false;
     next();
   });
 };
@@ -43,6 +45,7 @@ export const verifyAdmin: RequestHandler = (req: Request, res: Response, next: N
     }
     // @ts-ignore
     req.userID = decoded.id;
+    req.isAdmin = true;
     next();
   });
 };
