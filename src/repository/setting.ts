@@ -5,7 +5,7 @@ import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 
 const logger = createLogger('@settingRepository')
 
-export default  class SettingRepository {
+export default class SettingRepository {
     async getSettingForUser (connection: PoolConnection, userID: number): Promise<SettingView> {
         try {
             const [settings,] = await connection.query<Setting[]>('SELECT * from setting where user_id = ?', [userID]);

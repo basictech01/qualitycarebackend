@@ -25,4 +25,14 @@ export default class BranchRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async getBranchById(connection: PoolConnection, branch_id: number): Promise<Branch> {
+        try {
+            const [branch,] = await connection.query<Branch[]>('SELECT * from branch WHERE id = ?', [branch_id]);
+            return branch[0];
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }

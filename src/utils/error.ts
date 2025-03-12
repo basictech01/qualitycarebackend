@@ -17,6 +17,7 @@ export class RequestError {
 /*
 error code stating with 1 is common across all services
 error code starting with 2 is for user service flow
+error code starting with 3 is for service service flow
 
 
 
@@ -55,5 +56,10 @@ export const ERRORS = {
     INVALID_REFRESH_TOKEN: new RequestError("Invalid refresh token", 20006, 400),
     INVALID_AUTH_TOKEN: new RequestError("Invalid auth token", 20005, 400),
     USER_NOT_FOUND: new RequestError("User not found", 20007, 404),
+
+
+    INVALID_SERVICE_CATEGORY: new RequestError("Invalid service category", 30001, 400),
+    SERVICE_NOT_FOUND: new RequestError("Service not found", 30002, 404),
+    BRANCH_NOT_FOUND: new RequestError("Branch not found", 30003, 404),
 
 }
