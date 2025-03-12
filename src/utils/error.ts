@@ -18,6 +18,7 @@ export class RequestError {
 error code stating with 1 is common across all services
 error code starting with 2 is for user service flow
 error code starting with 3 is for service service flow
+error code starting with 4 is for doctor service flow
 
 
 
@@ -61,5 +62,7 @@ export const ERRORS = {
     INVALID_SERVICE_CATEGORY: new RequestError("Invalid service category", 30001, 400),
     SERVICE_NOT_FOUND: new RequestError("Service not found", 30002, 404),
     BRANCH_NOT_FOUND: new RequestError("Branch not found", 30003, 404),
-
+    DOCTOR_NOT_FOUND: new RequestError("Doctor not found", 30004, 404),
+    DOCTOR_BRANCH_NOT_FOUND: new RequestError("Doctor branch not found", 30005, 404),
+    DOCTOR_TIME_SLOT_NOT_FOUND: new RequestError("Doctor time slot not found", 30006, 404),
 }

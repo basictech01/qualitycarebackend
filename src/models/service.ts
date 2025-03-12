@@ -82,7 +82,7 @@ export function createServiceView(service: Service, serviceCategory: ServiceCate
 }
 
 const SERVICE_TIME_SLOT_DEFINATION = `
-CREATE TABLE Service_Time_Slot (
+CREATE TABLE service_time_slot (
     id INT PRIMARY KEY,
     service_id INT,
     start_time TIME,
