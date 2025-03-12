@@ -17,7 +17,7 @@ import vat from '@controller/vat';
 import loyalty from '@controller/loyalty';
 import branch from '@controller/branch';
 import banner from '@controller/banner';
-import settings from '@controller/settings';
+import settings from '@controller/setting';
 
 import pool from '@utils/db';
 
@@ -25,6 +25,7 @@ require("dotenv").config();
 const logger = createLogger('@app')
 
 async function start() {
+  
     // Start server here
     const app: Application = express()
     app.use(bodyParser.json())

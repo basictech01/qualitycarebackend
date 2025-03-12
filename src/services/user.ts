@@ -6,7 +6,7 @@ import pool from '@utils/db';
 import { ERRORS, RequestError } from '@utils/error';
 import createLogger from '@utils/logger';
 import { PoolConnection } from 'mysql2/promise';
-import { AuthUser } from '@models/user';
+import { AuthUser, User } from '@models/user';
 import { createAuthToken, createRefreshToken, decodeRefreshToken } from '@utils/jwt';
 
 const logger = createLogger('@userService');
@@ -219,6 +219,31 @@ export class UserService {
             } else {
                 logger.error(e);
                 throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        }
+    }
+
+    async updateUser(id: number, email_address: string | undefined, full_name: string | undefined, national_id: string | undefined, photo_url: string | undefined): Promise<User> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const user = await this.userRepository.getUserById(connection, id);
+            if (!user) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+            await this.userRepository.updateUser(connection, id, email_address, full_name, national_id, photo_url);
+            const updatedUser = await this.userRepository.getUserById(connection, id);
+            return updatedUser;
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
             }
         }
     }

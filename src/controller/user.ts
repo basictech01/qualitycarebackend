@@ -4,7 +4,8 @@ import { Router, Response, NextFunction } from 'express';
 import { Request } from '@customTypes/connection';
 import z from 'zod';
 import { successResponse } from '@utils/reponse';
-import { hash } from 'bcryptjs';
+import { verifyClient } from '@middleware/auth';
+import { ERRORS } from '@utils/error';
 
 var router = Router();
 const userService = new UserService();
@@ -35,6 +36,12 @@ const SCHEMA = {
     }),
     REFRESH_TOKEN: z.object({
         refresh_token: z.string().min(1)
+    }),
+    UPDATE_USER: z.object({
+        email_address: z.string().email().max(512).optional(),
+        full_name: z.string().min(1).optional(),
+        national_id: z.string().optional(),
+        photo_url: z.string().optional(),
     })
 }
 
@@ -135,6 +142,31 @@ router.post('/upload_photo',
         try {
             // TODO: implement this
             res.send(successResponse(true));
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.put('/',
+    verifyClient, 
+    validateRequest({
+        body: SCHEMA.UPDATE_USER
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        const body: z.infer<typeof SCHEMA.UPDATE_USER> = req.body
+        try {
+            if (!req.userID) {
+                next(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const user = await userService.updateUser(req.userID!!, body.email_address, body.full_name, body.national_id, body.photo_url);
+            res.send(successResponse({
+                full_name: user.full_name,
+                email_address: user.email_address,
+                phone_number: user.phone_number,
+                national_id: user.national_id,
+                photo_url: user.photo_url
+            }));
         } catch(e) {
             next(e)
         }

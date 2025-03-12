@@ -89,4 +89,45 @@ export default  class UserRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async updateUser (connection: PoolConnection, id: number, email_address: string | undefined, full_name: string | undefined, national_id: string | undefined, photo_url: string | undefined): Promise<User> {
+        try {
+            let query = 'UPDATE user SET '
+            const params = []
+            if (email_address) {
+                query += 'email_address = ?, '
+                params.push(email_address)
+            }
+            if (full_name) {
+                query += 'full_name = ?, '
+                params.push(full_name)
+            }
+            if (national_id) {
+                query += 'national_id = ?, '
+                params.push(national_id)
+            }
+            if (photo_url) {
+                query += 'photo_url = ?, '
+                params.push(photo_url)
+            }
+            if (params.length === 0) {
+                throw ERRORS.INVALID_REQUEST_BODY
+            }
+            query = query.slice(0, -2)
+            query += ' WHERE id = ?'
+            params.push(id)
+            const [result,] = await connection.query<ResultSetHeader>(query, params);
+            if (result.affectedRows === 0) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+            const [users,] = await connection.query<User[]>('SELECT * from user where id = ?', [id]);
+            return users[0];
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }

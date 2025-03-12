@@ -4,7 +4,6 @@ import {JWT_AUTH_SECRET} from "@utils/contants"
 import { Response, NextFunction, RequestHandler } from 'express';
 import { Request } from '@customTypes/connection';
 import { ERRORS } from '@utils/error';
-import { Request as ExpressRequest } from 'express';
 
 export const verifyClient: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   let token = req.headers["x-access-token"] as string;
