@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS comment (
 );
 
 CREATE TABLE IF NOT EXISTS branch (
-    id INT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     name_ar VARCHAR(1024),
     name_en VARCHAR(1024),
     city_en TEXT,

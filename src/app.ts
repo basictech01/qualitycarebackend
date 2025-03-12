@@ -31,6 +31,9 @@ async function start() {
     app.use(cors());
     app.use(morgan('combined'))
 
+    // TODO: not completed -> review, notification, loyalty, settings, branch
+    // TODO: leave for now -> service, doctor, booking
+
     app.use('/user', user);
 
     app.use('/service', service);
