@@ -32,9 +32,9 @@ export default class ReviewRepository {
         }
     }
 
-    async createReview(connection: PoolConnection, userID: number, bookingID: number, rating: number): Promise<Review> {
+    async createReview(connection: PoolConnection, userID: number, bookingID: number, rating: number, review: string | undefined): Promise<Review> {
         try {
-            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO review (user_id,booking_id,rating) VALUES (?,?,?)', [userID, bookingID, rating]);
+            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO review (user_id,booking_id,rating,review) VALUES (?,?,?,?)', [userID, bookingID, rating, review || '']);
             const [reviews,] = await connection.query<Review[]>('SELECT * from review where id = ?', [result.insertId]);
             return reviews[0];
         } catch (e) {

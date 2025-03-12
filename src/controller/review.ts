@@ -16,6 +16,7 @@ const reviewService = new ReviewService();
 const SCHEMA = {
     REVIEW_DETAILS: z.object({
         booking_id: z.number().min(1),
+        review: z.string().optional(),
         rating: z.number().min(1).max(5),
     }),
     REVIEW_COMMENT: z.object({
@@ -32,7 +33,7 @@ router.post('/',
             if (!req.userID) {
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
-            const review = await reviewService.createReview(req.userID!!, body.booking_id, body.rating);
+            const review = await reviewService.createReview(req.userID!!, body.booking_id, body.rating, body.review);
             res.send(successResponse(review));
         } catch (e) {
             next(e)

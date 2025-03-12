@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS review (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
     booking_id INT,
+    review TEXT,
     created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     rating INT
 );
