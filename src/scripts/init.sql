@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS  vat (
 );
 
 CREATE TABLE IF NOT EXISTS notification (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     message_en TEXT,
     message_ar TEXT,
     scheduled_timestamp DATETIME

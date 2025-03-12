@@ -1,7 +1,7 @@
 import { RowDataPacket } from "mysql2";
 
 const DEFINATION = `
-CREATE TABLE Setting (
+CREATE TABLE setting (
   user_id int NOT NULL,
   push_notification_enabled tinyint(1) DEFAULT NULL,
   email_notification_enabled tinyint(1) DEFAULT NULL,

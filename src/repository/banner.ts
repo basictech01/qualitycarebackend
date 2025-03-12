@@ -8,7 +8,7 @@ const logger = createLogger('@bannerRepository')
 export default class BannerRepository {
     async getBanners(connection: PoolConnection): Promise<Banner[]> {
         try {
-            const [banners,] = await connection.query<Banner[]>('SELECT * from banner');
+            const [banners,] = await connection.query<Banner[]>('SELECT * from banner where start_timestamp < now() and end_timestamp > now()');
             return banners
         } catch (e) {
             logger.error(e)

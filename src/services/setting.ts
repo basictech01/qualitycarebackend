@@ -1,4 +1,4 @@
-import { Setting, SettingView } from "@models/setting";
+import { SettingView } from "@models/setting";
 import SettingRepository from "@repository/setting";
 import pool from "@utils/db";
 import { ERRORS, RequestError } from "@utils/error";
