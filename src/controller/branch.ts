@@ -1,3 +1,4 @@
+import { verifyAdmin } from "@middleware/auth";
 import validateRequest from "@middleware/validaterequest";
 import BranchService from "@services/branch";
 import { successResponse } from "@utils/reponse";
@@ -31,6 +32,7 @@ router.get('/',
 )
 
 router.post('/',
+    verifyAdmin,
     validateRequest({
         body: SCHEMA.BRANCH_DETAILS
     }),

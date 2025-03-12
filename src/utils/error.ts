@@ -62,4 +62,8 @@ export const ERRORS = {
     SERVICE_NOT_FOUND: new RequestError("Service not found", 30002, 404),
     BRANCH_NOT_FOUND: new RequestError("Branch not found", 30003, 404),
 
+    BOOKING_NOT_FOUND: new RequestError("Booking not found", 40001, 404),
+
+    REVIEW_NOT_FOUND: new RequestError("Review not found", 50001, 404),
+
 }

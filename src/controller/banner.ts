@@ -1,3 +1,4 @@
+import { verifyAdmin } from "@middleware/auth";
 import validateRequest from "@middleware/validaterequest";
 import BannerService from "@services/banner";
 import { successResponse } from "@utils/reponse";
@@ -30,6 +31,7 @@ router.get('/',
 )
 
 router.post('/',
+    verifyAdmin,
     validateRequest({
         body: SCHEMA.BANNER_DETAILS
     }),

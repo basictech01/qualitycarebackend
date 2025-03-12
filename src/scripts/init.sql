@@ -12,19 +12,17 @@ CREATE TABLE IF NOT EXISTS notification (
 );
 
 CREATE TABLE IF NOT EXISTS review (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
     booking_id INT,
-    created_timestamp DATETIME,
+    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     rating INT
 );
 
 CREATE TABLE IF NOT EXISTS comment (
-    id INT PRIMARY KEY,
-    user_id INT,
-    booking_id INT,
-    created_timestamp DATETIME,
-    rating INT
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    review_id INT,
+    comment TEXT
 );
 
 CREATE TABLE IF NOT EXISTS branch (
@@ -42,7 +40,7 @@ CREATE TABLE IF NOT EXISTS banner (
     image_english_url TEXT,
     image_arabic_url TEXT,
     link TEXT,
-    created_timestamp DATETIME,
+    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     start_timestamp DATETIME,
     end_timestamp DATETIME
 );
@@ -56,7 +54,7 @@ CREATE TABLE IF NOT EXISTS user (
     national_id VARCHAR(512) UNIQUE,
     photo_url TEXT,
     password_hash VARCHAR(512),
-    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS setting (

@@ -19,20 +19,19 @@ import branch from '@controller/branch';
 import banner from '@controller/banner';
 import settings from '@controller/setting';
 
-import pool from '@utils/db';
 
 require("dotenv").config();
 const logger = createLogger('@app')
 
 async function start() {
-  
+
     // Start server here
     const app: Application = express()
     app.use(bodyParser.json())
     app.use(cors());
     app.use(morgan('combined'))
 
-    // TODO: not completed -> review, notification, loyalty, settings, branch
+    // TODO: not completed ->  notification
     // TODO: leave for now -> service, doctor, booking
 
     app.use('/user', user);
