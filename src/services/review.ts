@@ -18,7 +18,7 @@ export default class ReviewService {
         this.bookingRepository = new BookingRepository();
     }
 
-    async createReview(userID: number, bookingID: number, rating: number, review: string | undefined): Promise<Review> {
+    async createReview(userID: number, bookingID: number, rating: number, review: string): Promise<Review> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();

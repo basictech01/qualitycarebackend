@@ -1,4 +1,4 @@
-import { verifyClient } from "@middleware/auth";
+import { verifyAdmin, verifyClient } from "@middleware/auth";
 import { NextFunction, Router, Response } from "express";
 
 import { Request } from '@customTypes/connection';
@@ -16,7 +16,7 @@ const reviewService = new ReviewService();
 const SCHEMA = {
     REVIEW_DETAILS: z.object({
         booking_id: z.number().min(1),
-        review: z.string().optional(),
+        review: z.string(),
         rating: z.number().min(1).max(5),
     }),
     REVIEW_COMMENT: z.object({
@@ -42,7 +42,7 @@ router.post('/',
 )
 
 router.post('/comment',
-    verifyClient,
+    verifyAdmin,
     validateRequest({
         body: SCHEMA.REVIEW_COMMENT
     }),
