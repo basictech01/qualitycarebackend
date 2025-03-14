@@ -79,8 +79,6 @@ export const ERRORS = {
 
     INSUFFICIENT_QPOINTS: new RequestError("Insufficient QPoints", 60001, 400),
 
-    BOOKING_NOT_FOUND: new RequestError("Booking not found", 40001, 404),
-
     REVIEW_NOT_FOUND: new RequestError("Review not found", 50001, 404),
 
 }

@@ -22,7 +22,11 @@ export default class ReviewService {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
-            await this.bookingRepository.checkIfBookingExists(connection, bookingID);
+            let booking = await this.bookingRepository.getBookingService(connection, bookingID);
+            if (!booking) {
+                throw ERRORS.BOOKING_NOT_FOUND;
+            }
+            await this.reviewRepository.checkIfReviewExists(connection, bookingID);
             return await this.reviewRepository.createReview(connection, userID, bookingID, rating, review);
         } catch (e) {
             if (e instanceof RequestError) {
