@@ -33,7 +33,7 @@ export default class BannerService {
         }
     }
 
-    async createBanner(image_en: string, image_ar: string, link: string, start_timestamp: string, end_timestamp: string): Promise<Banner> {
+    async createBanner(image_en: string, image_ar: string, link: string, start_timestamp: Date, end_timestamp: Date): Promise<Banner> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();

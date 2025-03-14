@@ -1,9 +1,11 @@
 import { createServiceView, Service, ServiceBranch, ServiceCategory, ServiceTimeSlot, ServiceTimeSlotAvailableView, ServiceView } from "@models/service";
+import BookingRepository from "@repository/booking";
 import BranchRepository from "@repository/branch";
 import ServiceRepository from "@repository/service";
 import pool from "@utils/db";
 import { ERRORS, RequestError } from "@utils/error";
 import createLogger from "@utils/logger";
+import e from "express";
 
 import { PoolConnection } from "mysql2/promise";
 
@@ -12,10 +14,12 @@ const logger = createLogger('@serviceService');
 export default class SettingService {
     serviceRepository: ServiceRepository;
     branchRepository: BranchRepository;
+    bookingRepository: BookingRepository;
 
     constructor() {
         this.serviceRepository = new ServiceRepository();
         this.branchRepository = new BranchRepository();
+        this.bookingRepository = new BookingRepository();
     }
 
     async getAll(): Promise<ServiceView[]> {
@@ -48,7 +52,7 @@ export default class SettingService {
         }
     }
 
-    async create(name_en: string, name_ar: string, category_id: number, about_en: string, about_ar: string, actual_price: number, discounted_price: number, maximum_booking_per_slot: number, service_image_en_url: string, service_image_ar_url: string, can_redeem: boolean ): Promise<ServiceView> {
+    async create(name_en: string, name_ar: string, category_id: number, about_en: string, about_ar: string, actual_price: number, discounted_price: number, service_image_en_url: string, service_image_ar_url: string, can_redeem: boolean ): Promise<ServiceView> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -56,11 +60,11 @@ export default class SettingService {
             if (!service_category) {
                 throw ERRORS.INVALID_SERVICE_CATEGORY;
             }
-            const service = await this.serviceRepository.create(connection, name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, maximum_booking_per_slot, service_image_en_url, service_image_ar_url, can_redeem);
+            const service = await this.serviceRepository.create(connection, name_en, name_ar, category_id, about_en, about_ar, actual_price, discounted_price, service_image_en_url, service_image_ar_url, can_redeem);
             return createServiceView(service, service_category);
         } catch (error) {
-            if (connection) {
-                await connection.rollback();
+            if(error instanceof RequestError) {
+                throw error;
             }
             logger.error(`Error creating service: ${error}`);
             throw ERRORS.INTERNAL_SERVER_ERROR;
@@ -71,11 +75,12 @@ export default class SettingService {
         }
     }
 
-    async update(id: number, name_en: string | undefined, name_ar: string | undefined, category_id: number | undefined, about_en: string | undefined, about_ar: string | undefined, actual_price: number | undefined, discounted_price: number | undefined, maximum_booking_per_slot: number | undefined, service_image_en_url: string | undefined, service_image_ar_url: string | undefined, can_redeem: boolean | undefined): Promise<ServiceView> {
+    async update(id: number, name_en: string | undefined, name_ar: string | undefined, category_id: number | undefined, about_en: string | undefined, about_ar: string | undefined, actual_price: number | undefined, discounted_price: number | undefined, service_image_en_url: string | undefined, service_image_ar_url: string | undefined, can_redeem: boolean | undefined): Promise<ServiceView> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
-            const service = await this.serviceRepository.getServiceById(connection, id);
+            const service = await this.serviceRepository.getServiceByIdOrNull(connection, id);
+            logger.error(`service: ${service}`);
             if (!service) {
                 throw ERRORS.SERVICE_NOT_FOUND;
             }
@@ -96,9 +101,6 @@ export default class SettingService {
             }
             if(discounted_price !== undefined) {
                 service.discounted_price = discounted_price;
-            }
-            if(maximum_booking_per_slot !== undefined) {
-                service.maximum_booking_per_slot = maximum_booking_per_slot;
             }
             if(service_image_en_url !== undefined) {
                 service.service_image_en_url = service_image_en_url;
@@ -122,16 +124,17 @@ export default class SettingService {
                 serviceCategory = await this.serviceRepository.getServiceCategoryById(connection, service.category_id);
             }
 
-            const updatedService = await this.serviceRepository.update(connection, id, service.name_en, service.name_ar, service.category_id, service.about_en, service.about_ar, service.actual_price, service.discounted_price, service.maximum_booking_per_slot, service.service_image_en_url, service.service_image_ar_url, service.can_redeem);
+            const updatedService = await this.serviceRepository.update(connection, id, service.name_en, service.name_ar, service.category_id, service.about_en, service.about_ar, service.actual_price, service.discounted_price, service.service_image_en_url, service.service_image_ar_url, service.can_redeem);
             return createServiceView(updatedService, serviceCategory);
         } catch (error) {
-            if (connection) {
-                await connection.rollback();
+            if(error instanceof RequestError) {
+                throw error;
             }
             logger.error(`Error updating service: ${error}`);
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {
+                await connection.rollback();
                 connection.release();
             }
         }
@@ -192,7 +195,9 @@ export default class SettingService {
             const timeSlots = await this.serviceRepository.getTimeSlots(connection, service_id);
             return timeSlots;
         } catch (error) {
-            logger.error(`Error getting time slots: ${error}`);
+            if (error instanceof RequestError) {
+                throw error;
+            }
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {
@@ -201,28 +206,57 @@ export default class SettingService {
         }
     }
 
-    async getAvailableTimeSlots(service_id: number, date: Date): Promise<ServiceTimeSlotAvailableView[]> {
-        // let connection: PoolConnection | null = null;
-        // try {
-        //     connection = await pool.getConnection();
-        //     const service = await this.serviceRepository.getServiceById(connection, service_id);
-        //     if (!service) {
-        //         throw ERRORS.SERVICE_NOT_FOUND;
-        //     }
-        //     const timeSlots = await this.serviceRepository.getAvailableTimeSlots(connection, service_id, date);
-        //     return timeSlots;
-        // } catch (error) {
-        //     logger.error(`Error getting available time slots: ${error}`);
-        //     throw ERRORS.INTERNAL_SERVER_ERROR;
-        // } finally {
-        //     if (connection) {
-        //         connection.release();
-        //     }
-        // }
-        return [];
+    async getAvailableTimeSlots(service_id: number, branch_id: number, date: string): Promise<ServiceTimeSlotAvailableView[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const service = await this.serviceRepository.getServiceById(connection, service_id);
+            if (!service) {
+                throw ERRORS.SERVICE_NOT_FOUND;
+            }
+            const service_branch =  await this.serviceRepository.getServiceBranchOrNull(connection, service_id, branch_id);
+            if (!service_branch) {
+                throw ERRORS.BRANCH_NOT_FOUND;
+            }
+            const timeSlots = await this.serviceRepository.getTimeSlots(connection, service_id);
+            if(!timeSlots) {
+                throw ERRORS.SERVICE_TIME_SLOT_NOT_FOUND;
+            }
+            const booking = await this.bookingRepository.getAllServiceBookingForBranch(connection, service_id, branch_id, date);
+
+            const time_slot_ids = booking.map((bookingService) => bookingService.time_slot_id);
+            const time_slot_map = new Map<number, number>();
+            time_slot_ids.forEach((time_slot_id) => {
+                if (time_slot_map.has(time_slot_id)) {
+                    const current = time_slot_map.get(time_slot_id) ?? 0;
+                    time_slot_map.set(time_slot_id, current + 1);
+                } else {
+                    time_slot_map.set(time_slot_id, 1);
+                }
+            });
+            return timeSlots.map((timeSlot) => {
+                const available = time_slot_map.get(timeSlot.id) ?? 0;
+                return {
+                    id: timeSlot.id,
+                    service_id: timeSlot.service_id,
+                    start_time: timeSlot.start_time,
+                    end_time: timeSlot.end_time,
+                    available: available < service_branch.maximum_booking_per_slot
+                }
+            })
+        } catch (error) {
+            if (error instanceof RequestError) {
+                throw error;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
     }
 
-    async createServiceTimeSlot(service_id: number, start_time: Date, end_time: Date): Promise<ServiceTimeSlot> {
+    async createServiceTimeSlot(service_id: number, start_time: string, end_time: string): Promise<ServiceTimeSlot> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -233,13 +267,13 @@ export default class SettingService {
             const timeSlot = await this.serviceRepository.createServiceTimeSlot(connection, service_id, start_time, end_time);
             return timeSlot;
         } catch (error) {
-            if (connection) {
-                await connection.rollback();
+            if (error instanceof RequestError) {
+                throw error;
             }
-            logger.error(`Error creating time slot: ${error}`);
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {
+                await connection.rollback();
                 connection.release();
             }
         }
@@ -270,7 +304,9 @@ export default class SettingService {
             }
             return serviceViews;
         } catch (error) {
-            logger.error(`Error getting services for branch: ${error}`);
+            if (error instanceof RequestError) {
+                throw error;
+            }
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {
@@ -279,7 +315,7 @@ export default class SettingService {
         }
     }
 
-    async addServiceToBranch(service_id: number, branch_id: number ): Promise<ServiceBranch> {
+    async addServiceToBranch(service_id: number, branch_id: number, maximum_booking_per_slot: number): Promise<ServiceBranch> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -291,16 +327,20 @@ export default class SettingService {
             if (!branch) {
                 throw ERRORS.BRANCH_NOT_FOUND;
             }
-            const serviceBranch = await this.serviceRepository.addServiceToBranch(connection, service_id, branch_id);
+            const service_branch = await this.serviceRepository.getServiceBranchOrNull(connection, service_id, branch_id) 
+            if (service_branch) {
+                throw ERRORS.SERVICE_ALREADY_ADDED_TO_BRANCH;
+            }
+            const serviceBranch = await this.serviceRepository.addServiceToBranch(connection, service_id, branch_id, maximum_booking_per_slot);
             return serviceBranch;
         } catch (error) {
-            if (connection) {
-                await connection.rollback();
+            if (error instanceof RequestError) {
+                throw error;
             }
-            logger.error(`Error adding service to branch: ${error}`);
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {
+                await connection.rollback();
                 connection.release();
             }
         }

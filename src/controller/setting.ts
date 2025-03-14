@@ -6,6 +6,7 @@ import { ERRORS } from "@utils/error";
 import { z } from "zod";
 import validateRequest from "@middleware/validaterequest";
 import SettingService from '@services/setting';
+import { successResponse } from "@utils/reponse";
 
 var router = Router();
 
@@ -28,7 +29,7 @@ router.get('/',
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
             const setting = await settingService.getSettingForUser(req.userID!!);
-            res.send(setting);
+            res.send(successResponse(setting));
         } catch(e) {
             next(e)
         }
@@ -47,7 +48,7 @@ router.put('/',
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
             const setting = await settingService.updateSettingForUser(req.userID!!, body.email_notification_enabled, body.push_notification_enabled, body.sms_notification_enabled, body.preferred_language);
-            res.send(setting);
+            res.send(successResponse(setting));
         } catch(e) {
             next(e)
         }

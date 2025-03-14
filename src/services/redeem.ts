@@ -1,12 +1,12 @@
-import { verifyClient } from "@middleware/auth";
-import { NextFunction, Router, Response } from "express";
-
-import { Request } from '@customTypes/connection';
 import { ERRORS, RequestError } from "@utils/error";
 import RedeemRepository from '@repository/redeem';
 import { PoolConnection } from "mysql2/promise";
 import pool from "@utils/db";
 import BookingRepository from "@repository/booking";
+
+import createLogger from "@utils/logger";
+
+const logger = createLogger('@redeemService')
 
 const REDEEM_QPOINTS = 8;
 const QPOINTS_TO_REDEEM = 500;
@@ -60,9 +60,10 @@ export default class RedeemService {
 
             const totalSpendOnDoctor = await this.bookingRepository.getTotalSpendByUserOnDoctor(connection, user_id);
             const totalSpendOnService = await this.bookingRepository.getTotalSpendByUserOnService(connection, user_id);
-            const totalSpend = totalSpendOnDoctor + totalSpendOnService;
-            const totalQPoints = totalSpend / QPOINTS_TO_REDEEM;
 
+            const totalSpend = totalSpendOnDoctor + totalSpendOnService;
+            const totalQPoints = Math.floor(totalSpend / QPOINTS_TO_REDEEM);
+            
             const remainingQPoints = totalQPoints - alreadyRedeemedQPoints;
             return remainingQPoints;
         } catch (e) {

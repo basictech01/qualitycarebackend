@@ -47,7 +47,7 @@ async function start() {
     app.use('/redeem', redeem);
     app.use('/branch', branch);
     app.use('/banner', banner);
-    app.use('/settings', settings);
+    app.use('/setting', settings);
 
     app.use(errorHandler)
     const server = app.listen(PORT, function() {

@@ -2,7 +2,7 @@
 import { RowDataPacket } from "mysql2";
 
 const DEFINATION = `
-CREATE TABLE your_table_name (
+CREATE TABLE redeem (
     id INT PRIMARY KEY,
     user_id INT,
     booking_id INT,

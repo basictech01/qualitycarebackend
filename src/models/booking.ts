@@ -7,10 +7,10 @@ CREATE TABLE booking_service (
     id INT PRIMARY KEY,
     user_id INT,
     branch_id INT,
-    status ENUM('SCHEDULED', 'CANCELED', 'REFUND_INITIATED', 'REFUND_COMPLETED', 'COMPLETED') NOT NULL DEFAULT 'SCHEDULED',
     service_id INT,
     time_slot_id INT,
-    date varchar(255)
+    date varchar(255),
+    status ENUM('SCHEDULED', 'CANCELED', 'REFUND_INITIATED', 'REFUND_COMPLETED', 'COMPLETED') NOT NULL DEFAULT 'SCHEDULED',
 );
 `
 
@@ -23,7 +23,7 @@ export interface BookingServiceI extends RowDataPacket {
 }
 
 const DEFINATION_BOOKING = `
-CREATE TABLE Booking_Doctor (
+CREATE TABLE booking_doctor (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     status ENUM('SCHEDULED', 'CANCELED', 'REFUND_INITIATED', 'REFUND_COMPLETED', 'COMPLETED') NOT NULL DEFAULT 'SCHEDULED',

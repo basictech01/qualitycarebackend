@@ -1,6 +1,8 @@
+import { verifyAdmin } from "@middleware/auth";
 import validateRequest from "@middleware/validaterequest";
 import BranchService from "@services/branch";
 import { successResponse } from "@utils/reponse";
+import { verify } from "crypto";
 import { NextFunction, Request, Response, Router } from "express";
 import z from 'zod'
 
@@ -11,8 +13,8 @@ const SCHEMA = {
         name_en: z.string(),
         city_en: z.string(),
         city_ar: z.string(),
-        latitude: z.number(),
-        longitude: z.number()
+        latitude: z.number().min(-90).max(90),
+        longitude: z.number().min(-180).max(180),
     }),
 }
 
@@ -31,6 +33,7 @@ router.get('/',
 )
 
 router.post('/',
+    verifyAdmin,
     validateRequest({
         body: SCHEMA.BRANCH_DETAILS
     }),

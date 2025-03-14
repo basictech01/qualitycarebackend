@@ -1,3 +1,4 @@
+import { verifyAdmin } from "@middleware/auth";
 import validateRequest from "@middleware/validaterequest";
 import BannerService from "@services/banner";
 import { successResponse } from "@utils/reponse";
@@ -9,8 +10,8 @@ const SCHEMA = {
         image_en: z.string(),
         image_ar: z.string(),
         link: z.string(),
-        start_timestamp: z.string(),
-        end_timestamp: z.string(),
+        start_timestamp: z.string().datetime(),
+        end_timestamp: z.string().datetime(),
     }),
 }
 
@@ -30,13 +31,16 @@ router.get('/',
 )
 
 router.post('/',
+    verifyAdmin,
     validateRequest({
         body: SCHEMA.BANNER_DETAILS
     }),
     async function(req: Request, res: Response, next: NextFunction) {
-        const body: z.infer<typeof SCHEMA.BANNER_DETAILS> = req.body
         try {
-            const banner = await bannerService.createBanner(body.image_en, body.image_ar, body.link, body.start_timestamp, body.end_timestamp);
+            const body: z.infer<typeof SCHEMA.BANNER_DETAILS> = req.body
+            const start_timestamp = new Date(body.start_timestamp);
+            const end_timestamp = new Date(body.end_timestamp);
+            const banner = await bannerService.createBanner(body.image_en, body.image_ar, body.link, start_timestamp, end_timestamp);
             res.send(successResponse({ banner }));
         } catch (e) {
             next(e)

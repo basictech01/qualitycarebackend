@@ -6,6 +6,7 @@ import { ERRORS } from "@utils/error";
 import RedeemService from '@services/redeem';
 import { z } from "zod";
 import validateRequest from "@middleware/validaterequest";
+import { successResponse } from "@utils/reponse";
 
 
 var router = Router();
@@ -32,7 +33,7 @@ router.post('/',
             }
             const body: z.infer<typeof SCHEMA.REDEEM> = req.body;
             const redeem = await redeemService.redeem(req.userID!!, body.booking_id, body.service_id);
-            res.send(redeem);
+            res.send(successResponse(redeem));
         } catch(e) {
             next(e)
         }
@@ -47,7 +48,7 @@ router.get('/qpoints',
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
             const redeem = await redeemService.getQPoints(req.userID!!);
-            res.send(redeem);
+            res.send(successResponse(redeem));
         } catch(e) {
             next(e)
         }

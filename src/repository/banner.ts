@@ -15,9 +15,9 @@ export default class BannerRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
-    async createBanner(connection: PoolConnection, image_en: string, image_ar: string, link: string, start_timestamp: string, end_timestamp: string): Promise<Banner> {
+    async createBanner(connection: PoolConnection, image_en: string, image_ar: string, link: string, start_timestamp: Date, end_timestamp: Date): Promise<Banner> {
         try {
-            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO banner (image_english_url, image_arabic_url, link, start_timestamp, end_timestamp) VALUES (?, ?, ?, ?, ?)', [image_en, image_ar, link, start_timestamp, end_timestamp]);
+            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO banner (image_en, image_ar, link, start_timestamp, end_timestamp) VALUES (?, ?, ?, ?, ?)', [image_en, image_ar, link, start_timestamp, end_timestamp]);
             const [banner,] = await connection.query<Banner[]>('SELECT * from banner where id = ?', [result.insertId]);
             return banner[0]
         } catch (e) {

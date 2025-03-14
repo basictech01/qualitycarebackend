@@ -67,9 +67,15 @@ export const ERRORS = {
     DOCTOR_NOT_FOUND: new RequestError("Doctor not found", 30004, 404),
     DOCTOR_BRANCH_NOT_FOUND: new RequestError("Doctor branch not found", 30005, 404),
     DOCTOR_TIME_SLOT_NOT_FOUND: new RequestError("Doctor time slot not found", 30006, 404),
+    DOCTOR_NOT_ASSIGNED_TO_BRANCH: new RequestError("Doctor not assigned to branch", 30007, 400),
+    SERVICE_ALREADY_ADDED_TO_BRANCH: new RequestError("Service already added to branch", 30008, 400),
+    SERVICE_TIME_SLOT_NOT_FOUND: new RequestError("Service time slot not found", 30009, 404),
 
     BOOKING_NOT_FOUND: new RequestError("Booking not found", 50001, 404),
     DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT: new RequestError("Doctor already booked for this slot", 50002, 400),
+    BOOKING_NOT_FOUND_FOR_SERVICE: new RequestError("Booking not found for service", 50003, 404),
+    TIME_SLOT_NOT_FOUND_FOR_DOCTOR: new RequestError("Time slot not found for doctor", 50004, 404),
+    ALL_SLOTS_ALREADY_BOOKED_FOR_THIS_SERVICE: new RequestError("All slots already booked for this service", 50005, 400),
 
     INSUFFICIENT_QPOINTS: new RequestError("Insufficient QPoints", 60001, 400),
 

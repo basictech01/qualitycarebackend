@@ -11,11 +11,9 @@ CREATE TABLE service (
     about_ar TEXT,
     actual_price DECIMAL(10,2) NOT NULL,
     discounted_price DECIMAL(10,2),
-    maximum_booking_per_slot INT NOT NULL,
     service_image_en_url TEXT,
     service_image_ar_url TEXT,
     can_redeem BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (category_id) REFERENCES categories(id)
 )`
 
 
@@ -43,7 +41,6 @@ export interface Service extends RowDataPacket {
     about_ar: string;
     actual_price: number;
     discounted_price: number;
-    maximum_booking_per_slot: number;
     service_image_en_url: string;
     service_image_ar_url: string;
     can_redeem: boolean;
@@ -60,9 +57,9 @@ export interface ServiceView {
     about_ar: string;
     actual_price: number;
     discounted_price: number;
-    maximum_booking_per_slot: number;
     service_image_en_url: string;
     service_image_ar_url: string;
+    can_redeem: boolean;
 }
 
 export function createServiceView(service: Service, serviceCategory: ServiceCategory): ServiceView {
@@ -77,9 +74,9 @@ export function createServiceView(service: Service, serviceCategory: ServiceCate
         category_ar: serviceCategory.name_en,
         actual_price: service.actual_price,
         discounted_price: service.discounted_price,
-        maximum_booking_per_slot: service.maximum_booking_per_slot,
         service_image_en_url: service.service_image_en_url,
-        service_image_ar_url: service.service_image_ar_url
+        service_image_ar_url: service.service_image_ar_url,
+        can_redeem: service.can_redeem
     }
 }
 
@@ -111,10 +108,17 @@ const SERVICE_BRANCH_DEFINATION = `
 CREATE TABLE service_branch (
     service_id INT,
     branch_id INT,
+    maximum_booking_per_slot INT,
     PRIMARY KEY (branch_id, service_id)
 );`
 
 export interface ServiceBranch extends RowDataPacket {
     service_id: number;
     branch_id: number;
+    maximum_booking_per_slot: number;
+}
+
+
+export interface MaxBooking extends RowDataPacket {
+    maximum_booking_per_slot: number;
 }

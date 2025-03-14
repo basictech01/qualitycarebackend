@@ -1,7 +1,7 @@
 import { RowDataPacket } from "mysql2";
 
 export const DEFINATION = `
-CREATE TABLE Doctor (
+CREATE TABLE doctor (
     id INT PRIMARY KEY,
     session_fees INT NOT NULL,
     attended_patient INT DEFAULT 0,
@@ -63,7 +63,24 @@ CREATE TABLE doctor_time_slot (
 
 export interface DoctorTimeSlot extends RowDataPacket {
     id: number;
+    day: number;
     doctor_branch: number;
+    start_time: string;
+    end_time: string;
+}
+
+export interface DoctorTimeSlotView  {
+    day: number;
+    doctor_id: number;
+    branch_id: number;
+    start_time: string;
+    end_time: string;
+}
+
+export interface DoctorTimeSlotAvailable {
+    available: boolean;
+    doctor_id: number;
+    branch_id: number;
     start_time: string;
     end_time: string;
 }

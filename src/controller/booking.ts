@@ -15,7 +15,7 @@ const SCHEMA = {
     DOCTOR: z.object({
         doctor_id: z.number(),
         time_slot_id: z.number(),
-        date: z.date()
+        date: z.string().date()
     }),
     DOCTOR_CANCEL: z.object({
         booking_id: z.number()
@@ -26,12 +26,13 @@ const SCHEMA = {
     DOCTOR_RESCHEDULE: z.object({
         booking_id: z.number(),
         time_slot_id: z.number(),
-        date: z.date()
+        date: z.string().date()
     }),
     SERVICE: z.object({
         service_id: z.number(),
         time_slot_id: z.number(),
-        date: z.date()
+        branch_id: z.number(),
+        date: z.string().date()
     }),
     SERVICE_CANCEL: z.object({
         booking_id: z.number()
@@ -42,7 +43,7 @@ const SCHEMA = {
     SERVICE_RESCHEDULE: z.object({
         booking_id: z.number(),
         time_slot_id: z.number(),
-        date: z.date()
+        date: z.string().date()
     })
 }
 
@@ -133,8 +134,7 @@ router.post('/service',
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.SERVICE> = req.body;
-            const date = new Date(body.date);
-            const booking = await bookingService.bookService(body.service_id, body.time_slot_id, req.userID!!, date);
+            const booking = await bookingService.bookService(body.service_id, body.time_slot_id, req.userID!!, body.date, body.branch_id);
             res.send(booking);
         } catch(e) {
             next(e)
@@ -192,8 +192,7 @@ router.post('/service/reschedule',
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.SERVICE_RESCHEDULE> = req.body;
-            const date = new Date(body.date);
-            const booking = await bookingService.rescheduleService(body.booking_id, body.time_slot_id, req.userID!!, date, req.isAdmin ?? false);
+            const booking = await bookingService.rescheduleService(body.booking_id, body.time_slot_id, req.userID!!, body.date, req.isAdmin ?? false);
             res.send(booking);
         } catch(e) {
             next(e)
