@@ -1,7 +1,7 @@
 import { RowDataPacket } from "mysql2";
 
 const DEFINATION = `
-CREATE TABLE "user" (
+CREATE TABLE user (
     "id" int NOT NULL AUTO_INCREMENT,
     "full_name" varchar(1024) NOT NULL,
     "email_address" varchar(1024) NOT NULL,

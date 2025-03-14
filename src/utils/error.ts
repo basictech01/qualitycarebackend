@@ -18,6 +18,9 @@ export class RequestError {
 error code stating with 1 is common across all services
 error code starting with 2 is for user service flow
 error code starting with 3 is for service service flow
+error code starting with 4 is for doctor service flow
+error code starting with 5 is for booking service flow
+error code starting with 6 is for redeem service flow
 
 
 
@@ -61,6 +64,20 @@ export const ERRORS = {
     INVALID_SERVICE_CATEGORY: new RequestError("Invalid service category", 30001, 400),
     SERVICE_NOT_FOUND: new RequestError("Service not found", 30002, 404),
     BRANCH_NOT_FOUND: new RequestError("Branch not found", 30003, 404),
+    DOCTOR_NOT_FOUND: new RequestError("Doctor not found", 30004, 404),
+    DOCTOR_BRANCH_NOT_FOUND: new RequestError("Doctor branch not found", 30005, 404),
+    DOCTOR_TIME_SLOT_NOT_FOUND: new RequestError("Doctor time slot not found", 30006, 404),
+    DOCTOR_NOT_ASSIGNED_TO_BRANCH: new RequestError("Doctor not assigned to branch", 30007, 400),
+    SERVICE_ALREADY_ADDED_TO_BRANCH: new RequestError("Service already added to branch", 30008, 400),
+    SERVICE_TIME_SLOT_NOT_FOUND: new RequestError("Service time slot not found", 30009, 404),
+
+    BOOKING_NOT_FOUND: new RequestError("Booking not found", 50001, 404),
+    DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT: new RequestError("Doctor already booked for this slot", 50002, 400),
+    BOOKING_NOT_FOUND_FOR_SERVICE: new RequestError("Booking not found for service", 50003, 404),
+    TIME_SLOT_NOT_FOUND_FOR_DOCTOR: new RequestError("Time slot not found for doctor", 50004, 404),
+    ALL_SLOTS_ALREADY_BOOKED_FOR_THIS_SERVICE: new RequestError("All slots already booked for this service", 50005, 400),
+
+    INSUFFICIENT_QPOINTS: new RequestError("Insufficient QPoints", 60001, 400),
 
     BOOKING_NOT_FOUND: new RequestError("Booking not found", 40001, 404),
 

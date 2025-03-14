@@ -35,4 +35,27 @@ export default class BranchRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async getBranchByIdOrNull(connection: PoolConnection, branch_id: number): Promise<Branch | null> {
+        try {
+            const [branch,] = await connection.query<Branch[]>('SELECT * from branch WHERE id = ?', [branch_id]);
+            if (branch.length === 0) {
+                return null;
+            }
+            return branch[0];
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+    async getBranchForCity(connection: PoolConnection, city: string): Promise<Branch[]> {
+        try {
+            const [branch,] = await connection.query<Branch[]>('SELECT * from branch WHERE city_en = ?', [city]);
+            return branch;
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }

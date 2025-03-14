@@ -14,7 +14,7 @@ import booking from '@controller/booking';
 import review from '@controller/review';
 import notification from '@controller/notification';
 import vat from '@controller/vat';
-import loyalty from '@controller/loyalty';
+import redeem from '@controller/redeem';
 import branch from '@controller/branch';
 import banner from '@controller/banner';
 import settings from '@controller/setting';
@@ -43,10 +43,10 @@ async function start() {
     app.use('/review', review);
     app.use('/notification', notification);
     app.use('/vat', vat);
-    app.use('/loyalty', loyalty);
+    app.use('/redeem', redeem);
     app.use('/branch', branch);
     app.use('/banner', banner);
-    app.use('/settings', settings);
+    app.use('/setting', settings);
 
     app.use(errorHandler)
     const server = app.listen(PORT, function() {

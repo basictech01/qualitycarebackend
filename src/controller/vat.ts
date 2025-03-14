@@ -18,7 +18,7 @@ const SCHEMA = {
     }),
 }
 
-router.post('/',
+router.put('/',
     verifyAdmin,
     validateRequest({
         body: SCHEMA.UPDATE_VAT

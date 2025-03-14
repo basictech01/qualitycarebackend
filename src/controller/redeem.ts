@@ -3,57 +3,55 @@ import { NextFunction, Router, Response } from "express";
 
 import { Request } from '@customTypes/connection';
 import { ERRORS } from "@utils/error";
+import RedeemService from '@services/redeem';
 import { z } from "zod";
 import validateRequest from "@middleware/validaterequest";
-import SettingService from '@services/setting';
 import { successResponse } from "@utils/reponse";
+
 
 var router = Router();
 
-const settingService = new SettingService();
+
+const redeemService = new RedeemService();
 
 const SCHEMA = {
-    UPDATE_SETTING: z.object({
-        push_notification_enabled: z.boolean().optional(),
-        email_notification_enabled: z.boolean().optional(),
-        sms_notification_enabled: z.boolean().optional(),
-        preferred_language: z.enum(['en', 'ar']).optional()
+    REDEEM: z.object({
+        booking_id: z.number(),
+        service_id: z.number()
     })
 }
 
-router.get('/',
-    verifyClient,
-    async function(req: Request, res: Response, next: NextFunction) {
-        try {
-            if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
-            }
-            const setting = await settingService.getSettingForUser(req.userID!!);
-            res.send(successResponse(setting));
-        } catch(e) {
-            next(e)
-        }
-    }
-)
-
-router.put('/',
+router.post('/',
     verifyClient,
     validateRequest({
-        body: SCHEMA.UPDATE_SETTING
+        body: SCHEMA.REDEEM
     }),
     async function(req: Request, res: Response, next: NextFunction) {
-        const body: z.infer<typeof SCHEMA.UPDATE_SETTING> = req.body;
         try {
             if(!req.userID) {
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
-            const setting = await settingService.updateSettingForUser(req.userID!!, body.email_notification_enabled, body.push_notification_enabled, body.sms_notification_enabled, body.preferred_language);
-            res.send(successResponse(setting));
+            const body: z.infer<typeof SCHEMA.REDEEM> = req.body;
+            const redeem = await redeemService.redeem(req.userID!!, body.booking_id, body.service_id);
+            res.send(successResponse(redeem));
         } catch(e) {
             next(e)
         }
     }
 )
 
-
+router.get('/qpoints',
+    verifyClient,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            if(!req.userID) {
+                res.send(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const redeem = await redeemService.getQPoints(req.userID!!);
+            res.send(successResponse(redeem));
+        } catch(e) {
+            next(e)
+        }
+    }
+)
 export default router;
