@@ -1,14 +1,3 @@
-CREATE TABLE banner (
-    id INT NOT NULL AUTO_INCREMENT,
-    image_en VARCHAR(1024) NOT NULL,
-    image_ar VARCHAR(1024) NOT NULL,
-    link VARCHAR(1024) NOT NULL,
-    start_timestamp TIMESTAMP NOT NULL,
-    end_timestamp TIMESTAMP NOT NULL,
-    created_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id)
-);
-
 CREATE TABLE booking_service (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -17,6 +6,21 @@ CREATE TABLE booking_service (
     time_slot_id INT,
     date DATE NOT NULL,
     status ENUM('SCHEDULED', 'CANCELED', 'REFUND_INITIATED', 'REFUND_COMPLETED', 'COMPLETED') NOT NULL DEFAULT 'SCHEDULED'
+);
+
+CREATE TABLE IF NOT EXISTS review (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    booking_id INT,
+    review TEXT,
+    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    rating INT
+);
+
+CREATE TABLE IF NOT EXISTS comment (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    review_id INT,
+    comment TEXT
 );
 
 CREATE TABLE booking_doctor (
@@ -104,6 +108,17 @@ CREATE TABLE service_category (
     name_ar VARCHAR(1024) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS banner (
+    id INT NOT NULL AUTO_INCREMENT,
+    image_en VARCHAR(1024) NOT NULL,
+    image_ar VARCHAR(1024) NOT NULL,
+    link VARCHAR(1024) NOT NULL,
+    start_timestamp TIMESTAMP NOT NULL,
+    end_timestamp TIMESTAMP NOT NULL,
+    created_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
+
 CREATE TABLE service_time_slot (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     service_id INT NOT NULL,
@@ -135,6 +150,8 @@ CREATE TABLE user (
     phone_number VARCHAR(255) NOT NULL,
     national_id VARCHAR(512),
     photo_url TEXT,
+    password_hash VARCHAR(512),
+    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     is_admin TINYINT(1) NOT NULL DEFAULT 0,
     created_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY national_id_index (national_id),

@@ -6,8 +6,8 @@ import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 const logger = createLogger('@userRepository')
 
 
-export default  class UserRepository {
-    async checkIfUserExists (connection: PoolConnection, email: string, phone_number: string, national_id: string | undefined): Promise<void> {
+export default class UserRepository {
+    async checkIfUserExists(connection: PoolConnection, email: string, phone_number: string, national_id: string | undefined): Promise<void> {
         try {
             const [users,] = await connection.query<User[]>('SELECT * from user where email_address = ?', [email]);
             if (users.length > 0) {
@@ -31,7 +31,7 @@ export default  class UserRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
-    async createUser (connection: PoolConnection, email: string, password_hash: string, name: string, phone_number: string, national_id: string | undefined, photo_url: string | undefined): Promise<User> {
+    async createUser(connection: PoolConnection, email: string, password_hash: string, name: string, phone_number: string, national_id: string | undefined, photo_url: string | undefined): Promise<User> {
         try {
             const [result,] = await connection.query<ResultSetHeader>('INSERT INTO user (email_address, password_hash, full_name, phone_number, national_id, photo_url) VALUES (?, ?, ?, ?, ?, ?)', [email, password_hash, name, phone_number, national_id, photo_url]);
             const [users,] = await connection.query<User[]>('SELECT * from user where id = ?', [result.insertId]);
@@ -42,7 +42,7 @@ export default  class UserRepository {
         }
     }
 
-    async getUserById (connection: PoolConnection, id: number): Promise<User> {
+    async getUserById(connection: PoolConnection, id: number): Promise<User> {
         try {
             const [users,] = await connection.query<User[]>('SELECT * from user where id = ?', [id]);
             if (users.length === 0) {
@@ -58,7 +58,7 @@ export default  class UserRepository {
         }
     }
 
-    async getUserByEmail (connection: PoolConnection, email: string): Promise<User> {
+    async getUserByEmail(connection: PoolConnection, email: string): Promise<User> {
         try {
             const [users,] = await connection.query<User[]>('SELECT * from user where email_address = ?', [email]);
             if (users.length === 0) {
@@ -74,7 +74,7 @@ export default  class UserRepository {
         }
     }
 
-    async getUserByPhone (connection: PoolConnection, phone_number: string): Promise<User> {
+    async getUserByPhone(connection: PoolConnection, phone_number: string): Promise<User> {
         try {
             const [users,] = await connection.query<User[]>('SELECT * from user where phone_number = ?', [phone_number]);
             if (users.length === 0) {
@@ -90,7 +90,7 @@ export default  class UserRepository {
         }
     }
 
-    async updateUser (connection: PoolConnection, id: number, email_address: string | undefined, full_name: string | undefined, national_id: string | undefined, photo_url: string | undefined): Promise<User> {
+    async updateUser(connection: PoolConnection, id: number, email_address: string | undefined, full_name: string | undefined, national_id: string | undefined, photo_url: string | undefined): Promise<User> {
         try {
             let query = 'UPDATE user SET '
             const params = []

@@ -8,7 +8,7 @@ import BookingService from "@services/booking";
 const logger = createLogger('@bookingRepository')
 
 export default class BookingRepository {
-    
+
     async bookDoctor(connection: PoolConnection, doctor_id: number, time_slot_id: number, user_id: number, date: string): Promise<BookingDoctor> {
         try {
             const [result,] = await connection.query<ResultSetHeader>('INSERT INTO booking_doctor (doctor_id, time_slot_id, user_id, date) VALUES (?, ?, ?, ?)', [doctor_id, time_slot_id, user_id, date]);
