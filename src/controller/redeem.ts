@@ -1,4 +1,4 @@
-import { verifyClient } from "@middleware/auth";
+import { verifyAdmin, verifyClient } from "@middleware/auth";
 import { NextFunction, Router, Response } from "express";
 
 import { Request } from '@customTypes/connection';
@@ -28,13 +28,13 @@ router.post('/',
     }),
     async function(req: Request, res: Response, next: NextFunction) {
         try {
-            if(!req.userID) {
+            if (!req.userID) {
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.REDEEM> = req.body;
             const redeem = await redeemService.redeem(req.userID!!, body.booking_id, body.service_id);
             res.send(successResponse(redeem));
-        } catch(e) {
+        } catch (e) {
             next(e)
         }
     }
@@ -44,12 +44,37 @@ router.get('/qpoints',
     verifyClient,
     async function(req: Request, res: Response, next: NextFunction) {
         try {
-            if(!req.userID) {
+            if (!req.userID) {
                 res.send(ERRORS.AUTH_UNAUTHERISED);
             }
             const redeem = await redeemService.getQPoints(req.userID!!);
             res.send(successResponse(redeem));
-        } catch(e) {
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
+
+router.get('/user_list',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const redeem = await redeemService.getUserList()
+            res.send(successResponse(redeem));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
+router.get('/history',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const redeem = await redeemService.getAllRedeems()
+            res.send(successResponse(redeem));
+        } catch (e) {
             next(e)
         }
     }
