@@ -2,7 +2,6 @@ import { ERRORS, RequestError } from "@utils/error";
 import { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import createLogger from "@utils/logger";
 import { BookingDoctor, BookingServiceI } from "@models/booking";
-import BookingService from "@services/booking";
 
 
 const logger = createLogger('@bookingRepository')
@@ -70,6 +69,16 @@ export default class BookingRepository {
                 throw ERRORS.BOOKING_NOT_FOUND
             }
             return result[0];
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+    async getVisitCountByUser(connection: PoolConnection, user_id: number): Promise<number> {
+        try {
+            const [result,] = await connection.query<BookingServiceI[]>('SELECT COUNT(*) as count FROM booking_service WHERE user_id = ?', [user_id]);
+            return result[0].count;
         } catch (e) {
             logger.error(e)
             throw ERRORS.DATABASE_ERROR

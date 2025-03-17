@@ -24,7 +24,24 @@ const branchService = new BranchService();
 router.get('/',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
-            const banner = await branchService.getBranch();
+            const branch = await branchService.getBranch();
+            res.send(successResponse({ branch }));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
+router.put('/{id}',
+    verifyAdmin,
+    validateRequest({
+        body: SCHEMA.BRANCH_DETAILS
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        const body: z.infer<typeof SCHEMA.BRANCH_DETAILS> = req.body
+        try {
+            const id = parseInt(req.params.id)
+            const banner = await branchService.updateBranch(id, body.name_ar, body.name_en, body.city_en, body.city_ar, body.latitude, body.longitude);
             res.send(successResponse({ banner }));
         } catch (e) {
             next(e)
@@ -47,5 +64,20 @@ router.post('/',
         }
     }
 )
+
+router.delete('/{id}',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = parseInt(req.params.id)
+            const banner = await branchService.deleteBranch(id);
+            res.send(successResponse(banner.id));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
+
 
 export default router;

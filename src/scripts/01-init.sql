@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS review (
     user_id INT,
     booking_id INT,
     review TEXT,
-    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     rating INT
 );
 
@@ -84,7 +84,8 @@ CREATE TABLE redeem (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     booking_id INT,
-    service_id INT
+    service_id INT,
+    created_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE service (
@@ -150,10 +151,8 @@ CREATE TABLE user (
     phone_number VARCHAR(255) NOT NULL,
     national_id VARCHAR(512),
     photo_url TEXT,
-    password_hash VARCHAR(512),
-    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_admin TINYINT(1) NOT NULL DEFAULT 0,
-    created_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY national_id_index (national_id),
     UNIQUE KEY phone_number_index (phone_number),
     UNIQUE KEY email_index (email_address)

@@ -58,6 +58,16 @@ export default class UserRepository {
         }
     }
 
+    async getAllUsers(connection: PoolConnection): Promise<User[]> {
+        try {
+            const [users,] = await connection.query<User[]>('SELECT * from user');
+            return users
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
     async getUserByEmail(connection: PoolConnection, email: string): Promise<User> {
         try {
             const [users,] = await connection.query<User[]>('SELECT * from user where email_address = ?', [email]);
