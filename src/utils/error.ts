@@ -51,6 +51,7 @@ export const ERRORS = {
     CONNOT_DETERMINE_TIME: new RequestError("Some unhandled error occured at server", 10007, 500),
     INTERNAL_SERVER_ERROR: new RequestError("Internal server error", 10008, 500),
     ADMIN_ONLY_ROUTE: new RequestError("Only admin is allowed to access this route", 10009, 403),
+    FILE_NOT_FOUND: new RequestError("File not found", 10010, 400),
 
     EMAIL_ALREADY_EXISTS: new RequestError("Email already exists", 20001, 400),
     PHONE_ALREADY_EXISTS: new RequestError("Phone already exists", 20002, 400),

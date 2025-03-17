@@ -19,6 +19,8 @@ import branch from '@controller/branch';
 import banner from '@controller/banner';
 import settings from '@controller/setting';
 
+import pool from '@utils/db';
+import upload from '@controller/upload';
 
 require("dotenv").config();
 const logger = createLogger('@app')
@@ -47,6 +49,7 @@ async function start() {
     app.use('/branch', branch);
     app.use('/banner', banner);
     app.use('/setting', settings);
+    app.use('/upload', upload);
 
     app.use(errorHandler)
     const server = app.listen(PORT, function() {
