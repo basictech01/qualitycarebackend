@@ -5,6 +5,7 @@ CREATE TABLE review (
     id INT PRIMARY KEY,
     user_id INT,
     booking_id INT,
+    booking_type ENUM('SERVICE', 'DOCTOR'),
     review TEXT,
     created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     rating INT
@@ -20,6 +21,7 @@ export interface Review extends RowDataPacket {
     id: number;
     user_id: number;
     booking_id: number;
+    booking_type: 'SERVICE' | 'DOCTOR';
     review: string;
     created_timestamp: Date;
     rating: number;
@@ -30,3 +32,16 @@ export interface ReviewComment extends RowDataPacket {
     review_id: number;
     comment: string;
 }
+
+export interface ReviewView extends RowDataPacket {
+    id: number;
+    user_name: string;
+    user_photo_url: string;
+    type: string;
+    name: string;
+    review: string;
+    created_timestamp: Date;
+    rating: number;
+}
+
+

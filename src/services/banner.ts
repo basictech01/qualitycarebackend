@@ -33,6 +33,25 @@ export default class BannerService {
         }
     }
 
+    async getAllBanners(): Promise<Banner[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            return await this.bannerRepository.getAllBanners(connection);
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
     async createBanner(image_en: string, image_ar: string, link: string, start_timestamp: Date, end_timestamp: Date): Promise<Banner> {
         let connection: PoolConnection | null = null;
         try {

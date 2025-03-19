@@ -50,10 +50,12 @@ VALUES
 (1, 1, 1, 1, '2025-04-01', 'SCHEDULED'),
 (2, 2, 2, 2, '2025-04-02', 'COMPLETED');
 
-INSERT INTO review (user_id, booking_id, review, rating)
+INSERT INTO review (user_id, booking_id, review, rating, booking_type)
 VALUES
-(1, 1, 'Great service!', 5),
-(2, 2, 'Very satisfied!', 4);
+(1, 1, 'Great service!', 5, "SERVICE"),
+(2, 2, 'Very satisfied!', 4, "SERVICE"),
+(1, 1, 'Great service!', 5, "DOCTOR"),
+(2, 2, 'Very satisfied!', 4, "DOCTOR");
 
 INSERT INTO comment (review_id, comment)
 VALUES

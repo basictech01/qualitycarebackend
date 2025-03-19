@@ -79,6 +79,7 @@ router.post("/admin",
   // @ts-ignore
   upload.single('photo'), 
   async (req: Request, res: Response, next: NextFunction) => {
+  console.log(req);
   try {
     if (!req.file) {
       throw ERRORS.FILE_NOT_FOUND;

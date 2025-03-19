@@ -23,7 +23,19 @@ router.get('/',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const banner = await bannerService.getBanners();
-            res.send(successResponse({ banner }));
+            res.send(successResponse(banner));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
+router.get('/all',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const banner = await bannerService.getAllBanners();
+            res.send(successResponse(banner));
         } catch (e) {
             next(e)
         }
@@ -41,7 +53,7 @@ router.post('/',
             const start_timestamp = new Date(body.start_timestamp);
             const end_timestamp = new Date(body.end_timestamp);
             const banner = await bannerService.createBanner(body.image_en, body.image_ar, body.link, start_timestamp, end_timestamp);
-            res.send(successResponse({ banner }));
+            res.send(successResponse(banner));
         } catch (e) {
             next(e)
         }

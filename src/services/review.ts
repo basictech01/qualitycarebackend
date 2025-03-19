@@ -1,4 +1,4 @@
-import { Review, ReviewComment } from "@models/review";
+import { Review, ReviewComment, ReviewView } from "@models/review";
 import BookingRepository from "@repository/booking";
 import ReviewRepository from "@repository/review";
 import pool from "@utils/db";
@@ -18,7 +18,42 @@ export default class ReviewService {
         this.bookingRepository = new BookingRepository();
     }
 
-    async createReview(userID: number, bookingID: number, rating: number, review: string): Promise<Review> {
+    async getAllReviews(): Promise<ReviewView[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            return await this.reviewRepository.getAllReviews(connection);
+        } catch (e) {
+            logger.error(e);
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getCommentForReview(reviewID: number): Promise<ReviewComment> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            await this.reviewRepository.checkIfReviewExists(connection, reviewID);
+            return await this.reviewRepository.getCommentForReview(connection, reviewID);
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR
+            }   
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async createReview(userID: number, bookingID: number, rating: number, review: string, type: string): Promise<Review> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -26,8 +61,8 @@ export default class ReviewService {
             if (!booking) {
                 throw ERRORS.BOOKING_NOT_FOUND;
             }
-            await this.reviewRepository.checkIfReviewExists(connection, bookingID);
-            return await this.reviewRepository.createReview(connection, userID, bookingID, rating, review);
+            await this.reviewRepository.checkIfReviewExistsForBooking(connection, bookingID, type);
+            return await this.reviewRepository.createReview(connection, userID, bookingID, rating, review, type);
         } catch (e) {
             if (e instanceof RequestError) {
                 throw e;

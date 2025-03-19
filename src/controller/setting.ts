@@ -26,7 +26,7 @@ router.get('/',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const setting = await settingService.getSettingForUser(req.userID!!);
             res.send(successResponse(setting));
@@ -45,7 +45,7 @@ router.put('/',
         const body: z.infer<typeof SCHEMA.UPDATE_SETTING> = req.body;
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const setting = await settingService.updateSettingForUser(req.userID!!, body.email_notification_enabled, body.push_notification_enabled, body.sms_notification_enabled, body.preferred_language);
             res.send(successResponse(setting));

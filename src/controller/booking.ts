@@ -55,7 +55,7 @@ router.post('/doctor',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.DOCTOR> = req.body;
             const booking = await bookingService.bookDoctor(body.doctor_id, body.time_slot_id, req.userID!!, body.date);
@@ -74,7 +74,7 @@ router.post('/doctor/cancel',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.DOCTOR_CANCEL> = req.body;
             const booking = await bookingService.cancelDoctor(body.booking_id, req.userID!!, req.isAdmin ?? false);
@@ -93,7 +93,7 @@ router.post('/doctor/complete',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.DOCTOR_COMPLETE> = req.body;
             const booking = await bookingService.completeDoctor(body.booking_id, req.userID!!, req.isAdmin ?? false);
@@ -112,7 +112,7 @@ router.post('/doctor/reschedule',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.DOCTOR_RESCHEDULE> = req.body;
             const booking = await bookingService.rescheduleDoctor(body.booking_id, body.time_slot_id, req.userID!!, body.date, req.isAdmin ?? false);
@@ -131,7 +131,7 @@ router.post('/service',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.SERVICE> = req.body;
             const booking = await bookingService.bookService(body.service_id, body.time_slot_id, req.userID!!, body.date, body.branch_id);
@@ -150,7 +150,7 @@ router.post('/service/cancel',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.SERVICE_CANCEL> = req.body;
             const booking = await bookingService.cancelService(body.booking_id, req.userID!!, req.isAdmin ?? false);
@@ -169,7 +169,7 @@ router.post('/service/complete',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.SERVICE_COMPLETE> = req.body;
             const booking = await bookingService.completeService(body.booking_id, req.userID!!, req.isAdmin ?? false);
@@ -189,7 +189,7 @@ router.post('/service/reschedule',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if(!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.SERVICE_RESCHEDULE> = req.body;
             const booking = await bookingService.rescheduleService(body.booking_id, body.time_slot_id, req.userID!!, body.date, req.isAdmin ?? false);

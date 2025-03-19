@@ -168,6 +168,7 @@ CREATE TABLE review (
     user_id INT,
     booking_id INT,
     review TEXT,
+    booking_type ENUM('SERVICE', 'DOCTOR'),
     created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     rating INT
 );

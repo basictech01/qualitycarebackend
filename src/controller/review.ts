@@ -16,6 +16,7 @@ const reviewService = new ReviewService();
 const SCHEMA = {
     REVIEW_DETAILS: z.object({
         booking_id: z.number().min(1),
+        type: z.enum(['SERVICE', 'DOCTOR']),
         review: z.string(),
         rating: z.number().min(1).max(5),
     }),
@@ -25,15 +26,30 @@ const SCHEMA = {
     })
 }
 
+router.get('/',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            if (!req.userID) {
+                next(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const reviews = await reviewService.getAllReviews();
+            res.send(successResponse(reviews));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
 router.post('/',
     verifyClient,
     async function(req: Request, res: Response, next: NextFunction) {
         const body: z.infer<typeof SCHEMA.REVIEW_DETAILS> = req.body;
         try {
             if (!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
-            const review = await reviewService.createReview(req.userID!!, body.booking_id, body.rating, body.review);
+            const review = await reviewService.createReview(req.userID!!, body.booking_id, body.rating, body.review, body.type);
             res.send(successResponse(review));
         } catch (e) {
             next(e)
@@ -50,9 +66,25 @@ router.post('/comment',
         const body: z.infer<typeof SCHEMA.REVIEW_COMMENT> = req.body;
         try {
             if (!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const comment = await reviewService.createComment(body.review_id, body.comment);
+            res.send(successResponse(comment));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
+router.get('/comment/:review_id',
+    verifyClient,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            if (!req.userID) {
+                next(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const review_id = parseInt(req.params.review_id);
+            const comment = await reviewService.getCommentForReview(review_id);
             res.send(successResponse(comment));
         } catch (e) {
             next(e)

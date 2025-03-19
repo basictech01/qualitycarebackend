@@ -29,7 +29,7 @@ router.post('/',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if (!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.REDEEM> = req.body;
             const redeem = await redeemService.redeem(req.userID!!, body.booking_id, body.service_id);
@@ -45,7 +45,7 @@ router.get('/qpoints',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             if (!req.userID) {
-                res.send(ERRORS.AUTH_UNAUTHERISED);
+                next(ERRORS.AUTH_UNAUTHERISED);
             }
             const redeem = await redeemService.getQPoints(req.userID!!);
             res.send(successResponse(redeem));
