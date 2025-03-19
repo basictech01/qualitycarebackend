@@ -162,3 +162,17 @@ CREATE TABLE vat (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     vat_percentage DECIMAL(10,2) NOT NULL DEFAULT 0.00
 );
+
+CREATE TABLE review (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    booking_id INT,
+    review TEXT,
+    created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    rating INT
+);
+CREATE TABLE comment (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    review_id INT,
+    comment TEXT
+);

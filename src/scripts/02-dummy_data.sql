@@ -78,3 +78,5 @@ INSERT INTO vat (vat_percentage)
 VALUES
 (5.00),
 (10.00);
+
+

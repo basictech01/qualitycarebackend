@@ -18,7 +18,7 @@ export default class BranchRepository {
     async updateBranch(connection: PoolConnection, id: number, name_ar: string, name_en: string, city_en: string, city_ar: string, latitude: number, longitude: number): Promise<Branch> {
         try {
             const [result,] = await connection.query<ResultSetHeader>('UPDATE branch SET name_ar = ?, name_en = ?, city_en = ?, city_ar = ?, latitude = ?, longitude = ? WHERE id = ?', [name_ar, name_en, city_en, city_ar, latitude, longitude, id]);
-            const [branch,] = await connection.query<Branch[]>('SELECT * from branch where id = ?', [result.insertId]);
+            const [branch,] = await connection.query<Branch[]>('SELECT * from branch where id = ?', [id]);
             return branch[0]
         } catch (e) {
             logger.error(e)
@@ -27,7 +27,7 @@ export default class BranchRepository {
     }
     async createBranch(connection: PoolConnection, name_ar: string, name_en: string, city_en: string, city_ar: string, latitude: number, longitude: number): Promise<Branch> {
         try {
-            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO branch (name_ar,name_en,city_en,city_ar,latitude,longitude) VALUES (?,?,?,?,?,?)', [name_ar, name_en, city_en, city_ar, latitude, longitude]);
+            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO branch (name_ar, name_en, city_en, city_ar, latitude, longitude) VALUES (?,?,?,?,?,?)', [name_ar, name_en, city_en, city_ar, latitude, longitude]);
             const [branch,] = await connection.query<Branch[]>('SELECT * from branch where id = ?', [result.insertId]);
             return branch[0]
         } catch (e) {

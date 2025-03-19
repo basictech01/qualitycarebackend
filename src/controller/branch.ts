@@ -25,14 +25,14 @@ router.get('/',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const branch = await branchService.getBranch();
-            res.send(successResponse({ branch }));
+            res.send(successResponse(branch));
         } catch (e) {
             next(e)
         }
     }
 )
 
-router.put('/{id}',
+router.put('/:id',
     verifyAdmin,
     validateRequest({
         body: SCHEMA.BRANCH_DETAILS
@@ -41,8 +41,8 @@ router.put('/{id}',
         const body: z.infer<typeof SCHEMA.BRANCH_DETAILS> = req.body
         try {
             const id = parseInt(req.params.id)
-            const banner = await branchService.updateBranch(id, body.name_ar, body.name_en, body.city_en, body.city_ar, body.latitude, body.longitude);
-            res.send(successResponse({ banner }));
+            const branch = await branchService.updateBranch(id, body.name_ar, body.name_en, body.city_en, body.city_ar, body.latitude, body.longitude);
+            res.send(successResponse(branch));
         } catch (e) {
             next(e)
         }
@@ -57,15 +57,15 @@ router.post('/',
     async function(req: Request, res: Response, next: NextFunction) {
         const body: z.infer<typeof SCHEMA.BRANCH_DETAILS> = req.body
         try {
-            const banner = await branchService.createBranch(body.name_ar, body.name_en, body.city_en, body.city_ar, body.latitude, body.longitude);
-            res.send(successResponse({ banner }));
+            const branch = await branchService.createBranch(body.name_ar, body.name_en, body.city_en, body.city_ar, body.latitude, body.longitude);
+            res.send(successResponse(branch));
         } catch (e) {
             next(e)
         }
     }
 )
 
-router.delete('/{id}',
+router.delete('/:id',
     verifyAdmin,
     async function(req: Request, res: Response, next: NextFunction) {
         try {

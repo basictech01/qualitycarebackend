@@ -1,19 +1,19 @@
 import { RowDataPacket } from "mysql2";
 
 const DEFINATION = `
-CREATE TABLE "review" (
+CREATE TABLE review (
     id INT PRIMARY KEY,
     user_id INT,
     booking_id INT,
     review TEXT,
     created_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     rating INT
-)
-CREATE TABLE "comment" (
+);
+CREATE TABLE comment (
     id INT PRIMARY KEY,
     review_id INT,
-    comment TEXT,
-)
+    comment TEXT
+);
 `
 
 export interface Review extends RowDataPacket {
