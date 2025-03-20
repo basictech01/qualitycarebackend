@@ -119,6 +119,17 @@ router.get('/all/category',
     }
 )
 
+router.get('/category',
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const services = await serviceService.getAllCategory();
+            res.json(successResponse(services));
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
 
 router.post('/category',
     verifyAdmin,

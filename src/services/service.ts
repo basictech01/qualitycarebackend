@@ -375,4 +375,20 @@ export default class SettingService {
             }
         }
     }
+
+    async getAllCategory(): Promise<ServiceCategory[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const categories = await this.serviceRepository.getAllServicesCategories(connection);
+            return categories;
+        } catch (error) {
+            logger.error(`Error getting all categories: ${error}`);
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
 }
