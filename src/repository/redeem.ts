@@ -1,4 +1,4 @@
-import { Redeem } from "@models/redeem";
+import { Redeem, RedeemedPerUser } from "@models/redeem";
 import { ERRORS } from "@utils/error";
 import { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import createLogger from "@utils/logger";
@@ -8,6 +8,8 @@ const logger = createLogger('@redeemRepository')
 interface TotalRedeemCountRow extends RowDataPacket {
     count: number;
 }
+
+interface RedeemedPerUserRow extends RowDataPacket, RedeemedPerUser {}
 
 export default class RedeemRepository {
     async saveRedeem(connection: PoolConnection, user_id: number, booking_id: number, service_id: number): Promise<Redeem> {
@@ -60,5 +62,16 @@ export default class RedeemRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async getRedeemedPerUser(connection: PoolConnection): Promise<RedeemedPerUser[]> {
+        try {
+            const [redeem,] = await connection.query<RedeemedPerUserRow[]>('SELECT user_id, count(*) as redeemed from redeem group by user_id');
+            return redeem
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
 
 }

@@ -75,3 +75,7 @@ export interface BookingServiceView {
     date: string;
 }
 
+export interface TotalVisitsPerUser {
+    user_id: number;
+    total_visits: number;
+}

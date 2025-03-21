@@ -1,7 +1,7 @@
 import { ERRORS, RequestError } from "@utils/error";
 import { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import createLogger from "@utils/logger";
-import { BookingDoctor, BookingDoctorView, BookingServiceI, BookingServiceView } from "@models/booking";
+import { BookingDoctor, BookingDoctorView, BookingServiceI, BookingServiceView, TotalVisitsPerUser } from "@models/booking";
 import BookingService from "@services/booking";
 
 
@@ -17,6 +17,8 @@ interface BookingDoctorViewRow extends RowDataPacket, BookingDoctorView {
 
 interface BookingServiceViewRow extends RowDataPacket, BookingServiceView {
 }
+
+interface VisitsPerUserRow extends RowDataPacket, TotalVisitsPerUser {}
 export default class BookingRepository {
 
     async bookDoctor(connection: PoolConnection, doctor_id: number, time_slot_id: number, user_id: number, date: string): Promise<BookingDoctor> {
@@ -281,6 +283,27 @@ export default class BookingRepository {
                 JOIN service_time_slot sts ON bs.time_slot_id = sts.id
                 WHERE bs.user_id = ?`, [user_id]);
             return result;
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+    async getTotalServiceVisitsPerUser(connection: PoolConnection): Promise<TotalVisitsPerUser[]> {
+        try {
+            const [result,] = await connection.query<VisitsPerUserRow[]>('SELECT user_id, count(*) as visits from booking_service group by user_id');
+            return result
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+
+    async getTotalDoctorVisitsPerUser(connection: PoolConnection): Promise<TotalVisitsPerUser[]> {
+        try {
+            const [result,] = await connection.query<VisitsPerUserRow[]>('SELECT user_id, count(*) as visits from booking_doctor group by user_id');
+            return result
         } catch (e) {
             logger.error(e)
             throw ERRORS.DATABASE_ERROR

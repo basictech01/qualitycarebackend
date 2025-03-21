@@ -34,15 +34,9 @@ export default class RedeemService {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
-            const alreadyRedeemed = await this.redeemRepository.alreadyRedeemedByUser(connection, user_id);
-            const alreadyRedeemedQPoints = alreadyRedeemed.length * REDEEM_QPOINTS;
-
-            const totalSpendOnDoctor = await this.bookingRepository.getTotalSpendByUserOnDoctor(connection, user_id);
-            const totalSpendOnService = await this.bookingRepository.getTotalSpendByUserOnService(connection, user_id);
-            const totalSpend = totalSpendOnDoctor + totalSpendOnService;
-            const totalQPoints = totalSpend / QPOINTS_TO_REDEEM;
-
-            const remainingQPoints = totalQPoints - alreadyRedeemedQPoints;
+            const getTotalRedeemCountForUser = await this.redeemRepository.getTotalRedeemCountForUser(connection, user_id);
+            const alreadyRedeemed = getTotalRedeemCountForUser * REDEEM_QPOINTS;
+            const remainingQPoints = getTotalRedeemCountForUser - alreadyRedeemed;
             if (remainingQPoints < REDEEM_QPOINTS) {
                 throw ERRORS.INSUFFICIENT_QPOINTS;
             }

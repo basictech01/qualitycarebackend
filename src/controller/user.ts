@@ -200,6 +200,21 @@ router.put('/',
     }
 )
 
+router.get('/userMetrics',
+    verifyClient,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            if (!req.userID) {
+                next(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const metrics = await userService.getUserMetrics();
+            res.send(successResponse(metrics));
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
 
 
 export default router;

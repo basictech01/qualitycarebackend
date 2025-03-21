@@ -33,7 +33,17 @@ export interface QPoint {
     created_timestamp: Date;
 }
 
+export interface QPointUser {
+    user_id: number;
+    points: number;
+}
+
 export interface QPointUserView {
     total: number;
+    redeemed: number;
+}
+
+export interface RedeemedPerUser {
+    user_id: number;
     redeemed: number;
 }

@@ -40,3 +40,12 @@ export interface AuthUser {
     refresh_token: string;
     access_token: string;
 }
+
+export interface UserMetic {
+    id: number;
+    full_name: string;
+    points: number;
+    redeemed: number;
+    photo_url?: string;
+    total_visits: number;
+}

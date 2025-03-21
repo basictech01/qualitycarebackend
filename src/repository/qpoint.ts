@@ -11,6 +11,7 @@ interface TotalPointRow extends RowDataPacket {
 }
 
 interface QPointRow extends RowDataPacket, QPoint {}
+interface QPointUser extends RowDataPacket {}
 
 export default class QPointRepository {
 
@@ -29,6 +30,16 @@ export default class QPointRepository {
             const [result,] = await connection.query<ResultSetHeader>('INSERT INTO qpoint (user_id, points) VALUES (?, ?)', [user_id, points]);
             const [qpoint,] = await connection.query<QPointRow[]>('SELECT * from qpoint where id = ?', [result.insertId]);
             return qpoint[0]
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+    async getQPointsPerUser(connection: PoolConnection): Promise<QPointUser[]> {
+        try {
+            const [qpoints,] = await connection.query<QPointUser[]>('SELECT user_id, sum(points) as points from qpoint group by user_id');
+            return qpoints
         } catch (e) {
             logger.error(e)
             throw ERRORS.DATABASE_ERROR

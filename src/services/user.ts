@@ -6,8 +6,11 @@ import pool from '@utils/db';
 import { ERRORS, RequestError } from '@utils/error';
 import createLogger from '@utils/logger';
 import { PoolConnection } from 'mysql2/promise';
-import { AuthUser, User } from '@models/user';
+import { AuthUser, User, UserMetic } from '@models/user';
 import { createAuthToken, createRefreshToken, decodeRefreshToken } from '@utils/jwt';
+import BookingRepository from '@repository/booking';
+import RedeemRepository from '@repository/redeem';
+import QPointRepository from '@repository/qpoint';
 
 const logger = createLogger('@userService');
 
@@ -15,11 +18,17 @@ export class UserService {
     userRepository: UserRepository;
     smsRepository: SMSRepository;
     encryptionRepository: EncryptionRepository;
+    qpointRepository: QPointRepository;
+    redeemRepository: RedeemRepository;
+    bookingRepository: BookingRepository;
 
     constructor() {
         this.userRepository = new UserRepository();
         this.smsRepository = new SMSRepository();
         this.encryptionRepository = new EncryptionRepository();
+        this.qpointRepository = new QPointRepository();
+        this.redeemRepository = new RedeemRepository();
+        this.bookingRepository = new BookingRepository();
     }
 
     async createRegisterUserHash(email: string, password: string, name: string, phone_number: string, national_id: string | undefined, photo_url: string | undefined): Promise<string> {
@@ -297,6 +306,51 @@ export class UserService {
         } finally {
             if (connection) {
                 connection.release();
+            }
+        }
+    }
+
+    async getUserMetrics(): Promise<UserMetic[]> {
+        try {
+            const connection = await pool.getConnection();
+            const users = await this.userRepository.getAllUsers(connection);
+            const qpointsPerUser = await this.qpointRepository.getQPointsPerUser(connection);
+            const qpointsMap = new Map<number, number>();
+            qpointsPerUser.forEach((qpoint) => {
+                qpointsMap.set(qpoint.user_id, qpoint.points);
+            });
+            const redeemedPerUser = await this.redeemRepository.getRedeemedPerUser(connection);
+            const redeemedMap = new Map<number, number>();
+            redeemedPerUser.forEach((redeem) => {
+                redeemedMap.set(redeem.user_id, redeem.redeemed);
+            });
+            const totalDoctorVisitsPerUser = await this.bookingRepository.getTotalDoctorVisitsPerUser(connection);
+            const totalDoctorVisitsMap = new Map<number, number>();
+            totalDoctorVisitsPerUser.forEach((visit) => {
+                totalDoctorVisitsMap.set(visit.user_id, visit.total_visits);
+            });
+
+            const totalServiceVisitsPerUser = await this.bookingRepository.getTotalServiceVisitsPerUser(connection);
+            const totalServiceVisitsMap = new Map<number, number>();
+            totalServiceVisitsPerUser.forEach((visit) => {
+                totalServiceVisitsMap.set(visit.user_id, visit.total_visits);
+            });
+            return users.map((user) => {
+                return {
+                    id: user.id,
+                    full_name: user.full_name,
+                    points: qpointsMap.get(user.id) || 0,
+                    redeemed: redeemedMap.get(user.id) || 0,
+                    photo_url: user.photo_url,
+                    total_visits: (totalDoctorVisitsMap.get(user.id) || 0) + (totalServiceVisitsMap.get(user.id) || 0)
+                }
+            })
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
             }
         }
     }
