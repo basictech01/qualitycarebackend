@@ -60,13 +60,13 @@ CREATE TABLE doctor (
 CREATE TABLE doctor_branch (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     doctor_id INT NOT NULL,
+    day INT NOT NULL,
     branch_id INT NOT NULL,
     UNIQUE KEY (doctor_id, branch_id)
 );
 
 CREATE TABLE doctor_time_slot (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    day INT NOT NULL,
     doctor_id INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL
@@ -74,10 +74,19 @@ CREATE TABLE doctor_time_slot (
 
 CREATE TABLE notification (
     id INT NOT NULL AUTO_INCREMENT,
+    title_en VARCHAR(255) DEFAULT NULL,
+    title_ar VARCHAR(255) DEFAULT NULL,
     message_en VARCHAR(255) DEFAULT NULL,
     message_ar VARCHAR(255) DEFAULT NULL,
     scheduled_timestamp DATETIME DEFAULT NULL,
     PRIMARY KEY (id)
+);
+
+CREATE TABLE qpoint (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    points INT NOT NULL,
+    created_timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE redeem (
@@ -105,6 +114,8 @@ CREATE TABLE service (
 CREATE TABLE service_category (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     type ENUM('DENTIST', 'DERMATOLOGIST') NOT NULL,
+    image_ar VARCHAR(1024) NOT NULL,
+    image_en VARCHAR(1024) NOT NULL,
     name_en VARCHAR(1024) NOT NULL,
     name_ar VARCHAR(1024) NOT NULL
 );

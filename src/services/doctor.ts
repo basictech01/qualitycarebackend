@@ -112,7 +112,7 @@ export default class DoctorService {
         }
     }
 
-    async addDoctorToBranch(doctor_id: number, branch_id: number): Promise<DoctorBranch> {
+    async addDoctorToBranch(doctor_id: number, day: number, branch_id: number): Promise<DoctorBranch> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -124,7 +124,7 @@ export default class DoctorService {
             if (!branch) {
                 throw ERRORS.BRANCH_NOT_FOUND;
             }
-            return await this.doctorRepository.addDoctorToBranch(connection, doctor_id, branch_id);
+            return await this.doctorRepository.addDoctorToBranch(connection, doctor_id, day, branch_id);
         } catch (e) {
             if (e instanceof RequestError) {
                 throw e;
@@ -139,7 +139,7 @@ export default class DoctorService {
         }
     }
 
-    async crateDoctorTimeSlot(doctor_id: number, day: number, start_time: string, end_time: string, branch_id: number): Promise<DoctorTimeSlotView> {
+    async crateDoctorTimeSlot(doctor_id: number, start_time: string, end_time: string, branch_id: number): Promise<DoctorTimeSlotView> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -151,9 +151,8 @@ export default class DoctorService {
             if (!doctorBranch) {
                 throw ERRORS.DOCTOR_NOT_ASSIGNED_TO_BRANCH;
             }
-            await this.doctorRepository.createDoctorTimeSlot(connection, doctorBranch.id, day, start_time, end_time);
+            await this.doctorRepository.createDoctorTimeSlot(connection, doctorBranch.id, start_time, end_time);
             return {
-                day: day,
                 doctor_id: doctor_id,
                 branch_id: branch_id,
                 start_time: start_time,
@@ -189,7 +188,6 @@ export default class DoctorService {
             const doctor_time_slot = await this.doctorRepository.getDoctorTimeSlot(connection, doctorBranch.id, day);
             return doctor_time_slot.map(d => {
                 return {
-                    day: d.day,
                     doctor_id: doctor_id,
                     branch_id: branch_id,
                     start_time: d.start_time,
@@ -262,6 +260,25 @@ export default class DoctorService {
                 throw ERRORS.INTERNAL_SERVER_ERROR;
             }
         }   finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getFeaturedDoctors(): Promise<Doctor[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            return await this.doctorRepository.getFeaturedDoctors(connection);
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
             if (connection) {
                 connection.release();
             }

@@ -42,6 +42,14 @@ const SCHEMA = {
         full_name: z.string().min(1).optional(),
         national_id: z.string().optional(),
         photo_url: z.string().optional(),
+    }),
+    RESET_PASSWORD: z.object({
+        email_address: z.string().email().max(512)
+    }),
+    RESET_PASSWORD_VERIFY: z.object({
+        hash: z.string().min(1),
+        otp: z.number().min(1),
+        password: z.string().min(1)
     })
 }
 
@@ -137,11 +145,30 @@ router.post('/refresh_token',
     }
 )
 
-router.post('/upload_photo',
+router.post('/reset_password',
+    validateRequest({
+        body: SCHEMA.RESET_PASSWORD
+    }),
     async function(req: Request, res: Response, next: NextFunction) {
         try {
-            // TODO: implement this
-            res.send(successResponse(true));
+            const body: z.infer<typeof SCHEMA.RESET_PASSWORD> = req.body
+            const hash = await userService.creteResetPasswordHash(body.email_address);
+            res.send(successResponse({hash}))
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.post('/reset_password_verify',
+    validateRequest({
+        body: SCHEMA.RESET_PASSWORD_VERIFY
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const body: z.infer<typeof SCHEMA.RESET_PASSWORD_VERIFY> = req.body
+            await userService.resetPassword(body.hash, body.otp, body.password);
+            res.send(successResponse({}))
         } catch(e) {
             next(e)
         }

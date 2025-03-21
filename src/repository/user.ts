@@ -140,4 +140,19 @@ export default class UserRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async updatePassword(connection: PoolConnection, email: string, password_hash: string): Promise<void> {
+        try {
+            const [result,] = await connection.query<ResultSetHeader>('UPDATE user SET password_hash = ? WHERE email_address = ?', [password_hash, email]);
+            if (result.affectedRows === 0) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }

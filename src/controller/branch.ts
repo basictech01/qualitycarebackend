@@ -16,6 +16,14 @@ const SCHEMA = {
         latitude: z.number().min(-90).max(90),
         longitude: z.number().min(-180).max(180),
     }),
+    BRANCH_UPDATE: z.object({
+        name_ar: z.string().optional(),
+        name_en: z.string().optional(),
+        city_en: z.string().optional(),
+        city_ar: z.string().optional(),
+        latitude: z.number().min(-90).max(90).optional(),
+        longitude: z.number().min(-180).max(180).optional(),
+    })
 }
 
 var router = Router();
@@ -35,10 +43,10 @@ router.get('/',
 router.put('/:id',
     verifyAdmin,
     validateRequest({
-        body: SCHEMA.BRANCH_DETAILS
+        body: SCHEMA.BRANCH_UPDATE
     }),
     async function(req: Request, res: Response, next: NextFunction) {
-        const body: z.infer<typeof SCHEMA.BRANCH_DETAILS> = req.body
+        const body: z.infer<typeof SCHEMA.BRANCH_UPDATE> = req.body
         try {
             const id = parseInt(req.params.id)
             const branch = await branchService.updateBranch(id, body.name_ar, body.name_en, body.city_en, body.city_ar, body.latitude, body.longitude);
@@ -61,6 +69,24 @@ router.post('/',
             res.send(successResponse(branch));
         } catch (e) {
             next(e)
+        }
+    }
+)
+
+// Get all branch for a service
+router.get('/service',
+    validateRequest({
+        query: z.object({
+            service_id: z.string()
+        })
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const service_id = parseInt(req.query.service_id as string);
+            const branches = await branchService.getAllBranchForService(service_id);
+            res.json(successResponse(branches));
+        } catch (error) {
+            next(error);
         }
     }
 )

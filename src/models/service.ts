@@ -22,17 +22,21 @@ CREATE TABLE service_category (
     id INT PRIMARY KEY AUTO_INCREMENT,
     type ENUM('DENTIST', 'DERMATOLOGIST') NOT NULL,
     name_en VARCHAR(1024) NOT NULL,
-    name_ar VARCHAR(1024) NOT NULL
+    name_ar VARCHAR(1024) NOT NULL,
+    image_ar VARCHAR(1024) NOT NULL,
+    image_en VARCHAR(1024) NOT NULL
 );`
 
-export interface ServiceCategory extends RowDataPacket {
+export interface ServiceCategory  {
     id: number;
     type: string;
     name_en: string;
     name_ar: string;
+    image_ar: string;
+    image_en: string;
 }
 
-export interface Service extends RowDataPacket {
+export interface Service {
     id: number;
     name_en: string;
     name_ar: string;
@@ -89,7 +93,7 @@ CREATE TABLE service_time_slot (
 );
 `
 
-export interface ServiceTimeSlot extends RowDataPacket {
+export interface ServiceTimeSlot  {
     id: number;
     service_id: number;
     start_time: string;
@@ -112,13 +116,13 @@ CREATE TABLE service_branch (
     PRIMARY KEY (branch_id, service_id)
 );`
 
-export interface ServiceBranch extends RowDataPacket {
+export interface ServiceBranch  {
     service_id: number;
     branch_id: number;
     maximum_booking_per_slot: number;
 }
 
 
-export interface MaxBooking extends RowDataPacket {
+export interface MaxBooking {
     maximum_booking_per_slot: number;
 }

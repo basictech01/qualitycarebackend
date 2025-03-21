@@ -40,6 +40,8 @@ const SCHEMA = {
     CREATE_SERVICE_CATEGORY: z.object({
         name_en: z.string(),
         name_ar: z.string(),
+        image_ar: z.string(),
+        image_en: z.string(),
         type: z.enum(['DENTIST', 'DERMATOLOGIST'])
     }),
     CREATE_TIME_SLOT: z.object({
@@ -139,7 +141,7 @@ router.post('/category',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const body: z.infer<typeof SCHEMA.CREATE_SERVICE_CATEGORY> = req.body;
-            const category = await serviceService.createCategory(body.name_en, body.name_ar, body.type);
+            const category = await serviceService.createCategory(body.name_en, body.name_ar, body.image_ar, body.image_en, body.type);
             res.json(successResponse(category));
         } catch (error) {
             next(error);

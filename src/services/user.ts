@@ -247,4 +247,57 @@ export class UserService {
             }
         }
     }
+
+    async creteResetPasswordHash(email_address: string): Promise<String> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const user = await this.userRepository.getUserByEmail(connection, email_address);
+            if (!user) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+            const otp = await this.smsRepository.sendOTP(user.phone_number);
+            const data = {
+                email: user.email_address,
+                otp
+            };
+            const encryptedData = await this.encryptionRepository.encryptJSON(data);
+            return encryptedData
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async resetPassword(hash: string, otp: number, password: string): Promise<void> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const data = await this.encryptionRepository.decryptJSON(hash);
+            if (data.otp !== otp) {
+                throw ERRORS.INVALID_OTP;
+            }
+            const password_hash = await this.encryptionRepository.hashPassword(password);
+            await this.userRepository.updatePassword(connection, data.email, password_hash);
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
 }

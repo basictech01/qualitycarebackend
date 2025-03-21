@@ -8,9 +8,9 @@ const logger = createLogger('@notificationRepository')
 
 export default class NotificationRepository {
 
-    async insertNotification(connection: PoolConnection, message_ar: string, message_en: string, scheduled_timestamp: Date): Promise<Notification> {
+    async insertNotification(connection: PoolConnection, message_ar: string, message_en: string, title_ar: string, title_en: string, scheduled_timestamp: Date): Promise<Notification> {
         try {
-            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO notification (message_ar, message_en, scheduled_timestamp) VALUES (?, ?, ?)', [message_ar, message_en, scheduled_timestamp]);
+            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO notification (message_ar, message_en, title_ar, title_en, scheduled_timestamp) VALUES (?, ?, ?, ?, ?)', [message_ar, message_en, title_ar, title_en, scheduled_timestamp]);
             const [notification,] = await connection.query<Notification[]>('SELECT * from notification where id = ?', [result.insertId]);
             return notification[0]
         } catch (e) {

@@ -165,11 +165,11 @@ export default class SettingService {
         }
     }
 
-    async createCategory(name_en: string, name_ar: string, type: string): Promise<ServiceCategory> {
+    async createCategory(name_en: string, name_ar: string, image_ar: string, image_en: string, type: string): Promise<ServiceCategory> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
-            const category = await this.serviceRepository.createCategory(connection, name_en, name_ar, type);
+            const category = await this.serviceRepository.createCategory(connection, name_en, name_ar, image_ar, image_en, type);
             return category;
         } catch (error) {
             if (connection) {

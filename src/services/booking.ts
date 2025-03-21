@@ -3,6 +3,7 @@ import { Doctor } from "@models/doctor";
 import BookingRepository from "@repository/booking";
 import BranchRepository from "@repository/branch";
 import DoctorRepository from "@repository/doctor";
+import QPointRepository from "@repository/qpoint";
 import ServiceRepository from "@repository/service";
 import UserRepository from "@repository/user";
 import pool from "@utils/db";
@@ -19,6 +20,7 @@ export default class BookingService {
     serviceRepository: ServiceRepository;
     doctorRepository: DoctorRepository;
     branchRepository: BranchRepository;
+    qpointRepository: QPointRepository
 
     constructor() {
         this.bookingRepository = new BookingRepository();
@@ -26,6 +28,7 @@ export default class BookingService {
         this.serviceRepository = new ServiceRepository();
         this.doctorRepository = new DoctorRepository();
         this.branchRepository = new BranchRepository();
+        this.qpointRepository = new QPointRepository();
     }
 
     async bookDoctor(doctor_id: number, time_slot_id: number, user_id: number, date: string): Promise<BookingDoctor> {
@@ -106,6 +109,7 @@ export default class BookingService {
                 }
             }
             const newBooking = await this.bookingRepository.completeDoctor(connection, booking_id);
+            await this.qpointRepository.insertQPoint(connection, booking.user_id, 1);
             await connection.commit();
             return newBooking;
         } catch (e) {
@@ -227,6 +231,7 @@ export default class BookingService {
                 }
             }
             const newBooking = await this.bookingRepository.completeService(connection, booking_id);
+            await this.qpointRepository.insertQPoint(connection, booking.user_id, 1);
             await connection.commit();
             return newBooking;
         } catch (e) {

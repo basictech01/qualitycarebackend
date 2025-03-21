@@ -28,12 +28,12 @@ const SCHEMA = {
     }),
     ADD_DOCTOR_TO_BRANCH: z.object({
         doctor_id: z.number(),
+        day: z.number().min(1).max(7),
         branch_id: z.number()
     }),
     CREATE_DOCTOR_TIME_SLOT: z.object({
         doctor_id: z.number(),
         branch_id: z.number(),
-        day: z.number().min(1).max(7),
         start_time: z.string().time(),
         end_time: z.string().time()
     }),
@@ -103,7 +103,7 @@ router.post('/branch',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const body = req.body;
-            const doctorBranch = await doctorService.addDoctorToBranch(body.doctor_id, body.branch_id);
+            const doctorBranch = await doctorService.addDoctorToBranch(body.doctor_id, body.day, body.branch_id);
             res.json(successResponse(doctorBranch));
         } catch (e) {
             next(e);
@@ -120,7 +120,7 @@ router.post('/time-slot',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const body: z.infer<typeof SCHEMA.CREATE_DOCTOR_TIME_SLOT> = req.body
-            const timeSlots = await doctorService.crateDoctorTimeSlot(body.doctor_id, body.day, body.start_time, body.end_time, body.branch_id);
+            const timeSlots = await doctorService.crateDoctorTimeSlot(body.doctor_id, body.start_time, body.end_time, body.branch_id);
             res.json(successResponse(timeSlots));
         } catch (e) {
             next(e);
@@ -182,6 +182,16 @@ router.get('/time-slot/available',
         }
     }
 )
+
+router.get('/featured',
+    async function (req: Request, res: Response, next: NextFunction) {
+        try {
+            const doctors = await doctorService.getFeaturedDoctors();
+            res.json(successResponse(doctors));
+        } catch (e) {
+            next(e)
+    }
+})
 
 
 export default router;

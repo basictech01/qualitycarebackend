@@ -23,6 +23,8 @@ export default class NotificationService {
             const notifications = await this.notificationRepository.getNotifications(connection);
             return notifications.map(notification => {
                     return {
+                        title_ar: notification.title_ar,
+                        title_en: notification.title_en,
                         message_ar: notification.message_ar,
                         message_en: notification.message_en,
                         scheduled_timestamp: notification.scheduled_timestamp
@@ -43,14 +45,16 @@ export default class NotificationService {
         }
     }
 
-    async createNotification(message_ar: string, message_en: string, scheduled_timestamp: Date): Promise<NotificationView> {
+    async createNotification(message_ar: string, message_en: string, title_ar: string, title_en: string, scheduled_timestamp: Date): Promise<NotificationView> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
-            const notification = await this.notificationRepository.insertNotification(connection, message_ar, message_en, scheduled_timestamp);
+            const notification = await this.notificationRepository.insertNotification(connection, message_ar, message_en, title_ar, title_en, scheduled_timestamp);
             return {
                 message_ar: notification.message_ar,
                 message_en: notification.message_en,
+                title_ar: notification.title_ar,
+                title_en: notification.title_en,
                 scheduled_timestamp: notification.scheduled_timestamp
             }
         } catch (e) {

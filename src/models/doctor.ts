@@ -16,7 +16,7 @@ CREATE TABLE doctor (
 );
 `
 
-export interface Doctor extends RowDataPacket {
+export interface Doctor  {
     id: number;
     session_fees: number;
     attended_patient: number;
@@ -39,38 +39,37 @@ export const DOCTOR_BRANCH = `
 CREATE TABLE doctor_branch(
     int PRIMARY KEY,
     doctor_id INT NOT NULL,
+    day INT NOT NULL,
     branch_id INT NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY (doctor_id, branch_id)
 );
 `
 
-export interface DoctorBranch extends RowDataPacket {
+export interface DoctorBranch  {
     id: number;
     doctor_id: number;
+    day: number;
     branch_id: number;
 }
 
 export const DOCTOR_TIME_SLOT = `
 CREATE TABLE doctor_time_slot (
     id INT PRIMARY KEY,
-    day INT NOT NULL,
     doctor_id INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
 );
 `
 
-export interface DoctorTimeSlot extends RowDataPacket {
+export interface DoctorTimeSlot  {
     id: number;
-    day: number;
     doctor_id: number;
     start_time: string;
     end_time: string;
 }
 
 export interface DoctorTimeSlotView  {
-    day: number;
     doctor_id: number;
     branch_id: number;
     start_time: string;

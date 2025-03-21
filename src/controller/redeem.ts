@@ -40,7 +40,7 @@ router.post('/',
     }
 )
 
-router.get('/qpoints',
+router.get('/qpoint',
     verifyClient,
     async function(req: Request, res: Response, next: NextFunction) {
         try {

@@ -13,7 +13,7 @@ CREATE TABLE "branch" (
 )
 `
 
-export interface Branch extends RowDataPacket {
+export interface Branch  {
     id: number;
     name_ar: string;
     name_en: string;

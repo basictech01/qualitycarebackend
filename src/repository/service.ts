@@ -1,14 +1,19 @@
 import { MaxBooking, Service, ServiceBranch, ServiceCategory, ServiceTimeSlot } from "@models/service";
 import { ERRORS, RequestError } from "@utils/error";
 import createLogger from "@utils/logger";
-import { PoolConnection, ResultSetHeader } from "mysql2/promise";
+import { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 
 const logger = createLogger('@serviceRepository')
 
+interface ServiceRow extends Service, RowDataPacket {}
+interface ServiceCategoryRow extends ServiceCategory, RowDataPacket {}
+interface ServiceTimeSlotRow extends ServiceTimeSlot, RowDataPacket {}
+interface ServiceBranchRow extends ServiceBranch, RowDataPacket {}
+interface MaxBookingRow extends MaxBooking, RowDataPacket {}
 export default class ServiceRepository {
     async getAllServices(connection: PoolConnection): Promise<Service[]> {
         try {
-            const [services,] = await connection.query<Service[]>('SELECT * from service');
+            const [services,] = await connection.query<ServiceRow[]>('SELECT * from service');
             return services;
         } catch (e) {
             if (e instanceof RequestError) {
@@ -21,7 +26,7 @@ export default class ServiceRepository {
 
     async getServiceById(connection: PoolConnection, service_id: number): Promise<Service> {
         try {
-            const [services,] = await connection.query<Service[]>('SELECT * from service WHERE id = ?', [service_id]);
+            const [services,] = await connection.query<ServiceRow[]>('SELECT * from service WHERE id = ?', [service_id]);
             if(services.length === 0) {
                 throw ERRORS.SERVICE_NOT_FOUND;
             }
@@ -37,7 +42,7 @@ export default class ServiceRepository {
 
     async getServiceByIdOrNull(connection: PoolConnection, service_id: number): Promise<Service | null> {
         try {
-            const [services,] = await connection.query<Service[]>('SELECT * from service WHERE id = ?', [service_id]);
+            const [services,] = await connection.query<ServiceRow[]>('SELECT * from service WHERE id = ?', [service_id]);
             if(services.length === 0) {
                 return null;
             }
@@ -53,7 +58,7 @@ export default class ServiceRepository {
 
     async getAllServicesCategories(connection: PoolConnection): Promise<ServiceCategory[]> {
         try {
-            const [services,] = await connection.query<ServiceCategory[]>('SELECT * from service_category');
+            const [services,] = await connection.query<ServiceCategoryRow[]>('SELECT * from service_category');
             return services;
         } catch (e) {
             if (e instanceof RequestError) {
@@ -66,7 +71,7 @@ export default class ServiceRepository {
 
     async getServiceCategoryById(connection: PoolConnection, category_id: number): Promise<ServiceCategory> {
         try {
-            const [services,] = await connection.query<ServiceCategory[]>('SELECT * from service_category WHERE id = ?', [category_id]);
+            const [services,] = await connection.query<ServiceCategoryRow[]>('SELECT * from service_category WHERE id = ?', [category_id]);
             return services[0];
         } catch (e) {
             if (e instanceof RequestError) {
@@ -79,7 +84,7 @@ export default class ServiceRepository {
 
     async getServiceCategoryByIdOrNull(connection: PoolConnection, category_id: number): Promise<ServiceCategory | null> {
         try {
-            const [services,] = await connection.query<ServiceCategory[]>('SELECT * from service_category WHERE id = ?', [category_id]);
+            const [services,] = await connection.query<ServiceCategoryRow[]>('SELECT * from service_category WHERE id = ?', [category_id]);
             if (services.length === 0) {
                 return null;
             }
@@ -124,7 +129,7 @@ export default class ServiceRepository {
 
     async getAllServicesByCategory(connection: PoolConnection, category_id: number): Promise<Service[]> {
         try {
-            const [services,] = await connection.query<Service[]>('SELECT * from service WHERE category_id = ?', [category_id]);
+            const [services,] = await connection.query<ServiceRow[]>('SELECT * from service WHERE category_id = ?', [category_id]);
             return services;
         } catch (e) {
             if (e instanceof RequestError) {
@@ -135,9 +140,9 @@ export default class ServiceRepository {
         }
     }
 
-    async createCategory(connection: PoolConnection, name_en: string, name_ar: string, type: string): Promise<ServiceCategory> {
+    async createCategory(connection: PoolConnection, name_en: string, name_ar: string, image_ar: string, image_en: string, type: string): Promise<ServiceCategory> {
         try {
-            const [result] = await connection.query<ResultSetHeader>('INSERT INTO service_category (name_en, name_ar, type) VALUES (?, ?, ?)', [name_en, name_ar, type]);
+            const [result] = await connection.query<ResultSetHeader>('INSERT INTO service_category (name_en, name_ar, image_ar, image_en, type) VALUES (?, ?, ?, ?, ?)', [name_en, name_ar, image_ar, image_en, type]);
             const category = await this.getServiceCategoryById(connection, result.insertId);
             return category;
         } catch (error) {
@@ -152,7 +157,7 @@ export default class ServiceRepository {
 
     async getTimeSlots(connection: PoolConnection, service_id: number): Promise<ServiceTimeSlot[]> {
         try {
-            const [timeSlots,] = await connection.query<ServiceTimeSlot[]>('SELECT * from service_time_slot WHERE service_id = ?', [service_id]);
+            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE service_id = ?', [service_id]);
             return timeSlots;
         } catch (e) {
             if (e instanceof RequestError) {
@@ -165,7 +170,7 @@ export default class ServiceRepository {
 
     async getServiceTimeSlotByIdOrNull(connection: PoolConnection, time_slot_id: number): Promise<ServiceTimeSlot | null> {
         try {
-            const [timeSlots,] = await connection.query<ServiceTimeSlot[]>('SELECT * from service_time_slot WHERE id = ?', [time_slot_id]);
+            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE id = ?', [time_slot_id]);
             if (timeSlots.length === 0) {
                 return null;
             }
@@ -183,7 +188,7 @@ export default class ServiceRepository {
                 'INSERT INTO service_time_slot (service_id, start_time, end_time) VALUES (?, ?, ?)',
                 [service_id, start_time, end_time]
             );
-            const [timeSlots,] = await connection.query<ServiceTimeSlot[]>('SELECT * from service_time_slot WHERE id = ?', [result.insertId]);
+            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE id = ?', [result.insertId]);
             return timeSlots[0];
         } catch (error) {
             logger.error(`Error creating service time slot: ${error}`);
@@ -212,7 +217,7 @@ export default class ServiceRepository {
 
     async getServiceBranchOrNull(connection: PoolConnection, service_id: number, branch_id: number): Promise<ServiceBranch | null> {
         try {
-            const [serviceBranch,] = await connection.query<ServiceBranch[]>('SELECT * from service_branch WHERE branch_id = ? AND service_id = ?', [branch_id, service_id]);
+            const [serviceBranch,] = await connection.query<ServiceBranchRow[]>('SELECT * from service_branch WHERE branch_id = ? AND service_id = ?', [branch_id, service_id]);
             if (serviceBranch.length === 0) {
                 return null
             }
@@ -226,7 +231,7 @@ export default class ServiceRepository {
 
     async getServicesForBranch(connection: PoolConnection, branch_id: number): Promise<Service[]> {
         try {
-            const [services,] = await connection.query<Service[]>(
+            const [services,] = await connection.query<ServiceRow[]>(
                 'SELECT s.* FROM service s JOIN branch_service bs ON s.id = bs.service_id WHERE bs.branch_id = ?',
                 [branch_id]
             );
@@ -239,7 +244,7 @@ export default class ServiceRepository {
 
     async getRedeemableServices(connection: PoolConnection): Promise<Service[]> {
         try {
-            const [services,] = await connection.query<Service[]>(
+            const [services,] = await connection.query<ServiceRow[]>(
                 'SELECT * FROM service WHERE can_redeem = 1'
             );
             return services;
@@ -251,7 +256,7 @@ export default class ServiceRepository {
     
     async getMaximumBooking(connection: PoolConnection, service_id: number, branch_id: number): Promise<MaxBooking> {
         try {
-            const [result,] = await connection.query<MaxBooking[]>(
+            const [result,] = await connection.query<MaxBookingRow[]>(
                 'SELECT maximum_booking_per_slot FROM service_branch WHERE service_id = ? AND branch_id = ?',
                 [service_id, branch_id]
             );
@@ -267,7 +272,7 @@ export default class ServiceRepository {
 
     async getAllServicesForBranch(connection: PoolConnection, branch_id: number): Promise<ServiceBranch[]> {
         try {
-            const [services,] = await connection.query<ServiceBranch[]>(
+            const [services,] = await connection.query<ServiceBranchRow[]>(
                 'SELECT * FROM service_branch WHERE branch_id = ?',
                 [branch_id]
             );
@@ -280,7 +285,7 @@ export default class ServiceRepository {
 
     async getAllBranchesForService(connection: PoolConnection, service_id: number): Promise<ServiceBranch[]> {
         try {
-            const [services,] = await connection.query<ServiceBranch[]>(
+            const [services,] = await connection.query<ServiceBranchRow[]>(
                 'SELECT * FROM service_branch WHERE service_id = ?',
                 [service_id]
             );

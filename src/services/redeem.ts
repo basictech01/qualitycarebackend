@@ -5,9 +5,10 @@ import pool from "@utils/db";
 import BookingRepository from "@repository/booking";
 
 import createLogger from "@utils/logger";
-import { Redeem } from "@models/redeem";
+import { QPoint, QPointUserView, Redeem } from "@models/redeem";
 import BranchRepository from "@repository/branch";
 import UserRepository from "@repository/user";
+import QPointRepository from "@repository/qpoint";
 
 const logger = createLogger('@redeemService')
 
@@ -19,12 +20,14 @@ export default class RedeemService {
     bookingRepository: BookingRepository;
     branchRepository: BranchRepository;
     userRepository: UserRepository;
+    qPointRepository: QPointRepository;
 
     constructor() {
         this.redeemRepository = new RedeemRepository();
         this.bookingRepository = new BookingRepository();
         this.branchRepository = new BranchRepository();
         this.userRepository = new UserRepository();
+        this.qPointRepository = new QPointRepository();
     }
 
     async redeem(user_id: number, booking_id: number, service_id: number): Promise<any> {
@@ -58,21 +61,17 @@ export default class RedeemService {
         }
     }
 
-    async getQPoints(user_id: number): Promise<number> {
+    async getQPoints(user_id: number): Promise<QPointUserView> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
-            const alreadyRedeemed = await this.redeemRepository.alreadyRedeemedByUser(connection, user_id);
-            const alreadyRedeemedQPoints = alreadyRedeemed.length * REDEEM_QPOINTS;
-
-            const totalSpendOnDoctor = await this.bookingRepository.getTotalSpendByUserOnDoctor(connection, user_id);
-            const totalSpendOnService = await this.bookingRepository.getTotalSpendByUserOnService(connection, user_id);
-
-            const totalSpend = totalSpendOnDoctor + totalSpendOnService;
-            const totalQPoints = Math.floor(totalSpend / QPOINTS_TO_REDEEM);
-
-            const remainingQPoints = totalQPoints - alreadyRedeemedQPoints;
-            return remainingQPoints;
+            const totalQPoints = await this.qPointRepository.getTotalQPointsByUser(connection, user_id);
+            const getTotalRedeemCountForUser = await this.redeemRepository.getTotalRedeemCountForUser(connection, user_id);
+            const alreadyRedeemed = getTotalRedeemCountForUser * REDEEM_QPOINTS;
+            return {
+                total: totalQPoints,
+                redeemed: alreadyRedeemed
+            }
         } catch (e) {
             if (e instanceof RequestError) {
                 throw e;

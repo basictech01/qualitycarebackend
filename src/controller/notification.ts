@@ -14,6 +14,8 @@ const SCHEMA = {
     CREATE_NOTIFICATION: z.object({
         message_en: z.string(),
         message_ar: z.string(),
+        title_ar: z.string(),
+        title_en: z.string(),
         scheduled_timestamp: z.string().datetime(),
     })
 }
@@ -39,7 +41,7 @@ router.post('/',
         try {
             const body: z.infer<typeof SCHEMA.CREATE_NOTIFICATION> = req.body;
             const scheduled_timestamp = new Date(body.scheduled_timestamp);
-            const notification = await notificationService.createNotification(body.message_ar, body.message_en, scheduled_timestamp);
+            const notification = await notificationService.createNotification(body.message_ar, body.message_en, body.title_ar, body.title_en, scheduled_timestamp);
             res.send(successResponse(notification));
         } catch(e) {
             next(e)
