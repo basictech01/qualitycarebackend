@@ -61,7 +61,7 @@ router.get('/',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const services = await serviceService.getAll();
-            res.json(services);
+            res.json(successResponse(services));
         } catch (error) {
             next(error);
         }

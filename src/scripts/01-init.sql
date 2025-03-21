@@ -67,7 +67,7 @@ CREATE TABLE doctor_branch (
 CREATE TABLE doctor_time_slot (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     day INT NOT NULL,
-    doctor_branch INT NOT NULL,
+    doctor_id INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL
 );

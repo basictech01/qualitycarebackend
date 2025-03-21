@@ -41,6 +41,30 @@ router.get('/',
     }
 )
 
+router.get('/doctor/:doctor_id',
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const doctor_id = parseInt(req.params.doctor_id);
+            const reviews = await reviewService.getAllReviewsForDoctor(doctor_id);
+            res.send(successResponse(reviews));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
+router.get('/service/:service_id',
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const service_id = parseInt(req.params.service_id);
+            const reviews = await reviewService.getAllReviewsForService(service_id);
+            res.send(successResponse(reviews));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
 router.post('/',
     verifyClient,
     async function(req: Request, res: Response, next: NextFunction) {

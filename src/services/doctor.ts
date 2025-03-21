@@ -1,4 +1,4 @@
-import { Doctor, DoctorBranch, DoctorTimeSlotAvailable, DoctorTimeSlotView } from "@models/doctor";
+import { Doctor, DoctorBranch, DoctorTimeSlot, DoctorTimeSlotAvailable, DoctorTimeSlotView } from "@models/doctor";
 import BookingRepository from "@repository/booking";
 import BranchRepository from "@repository/branch";
 import DoctorRepository from "@repository/doctor";
@@ -209,6 +209,31 @@ export default class DoctorService {
             }
         }
     }
+
+    async getAllDoctorTimeSlot(doctor_id: number): Promise<DoctorTimeSlot[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const doctor = await this.doctorRepository.getDoctorByIdOrNull(connection, doctor_id);
+            if (!doctor) {
+                throw ERRORS.DOCTOR_NOT_FOUND;
+            }
+            const doctor_time_slot = await this.doctorRepository.getAllDoctorTimeSlot(connection, doctor_id);
+            return doctor_time_slot
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
 
     async getAvailableTimeSlots(doctor_id: number, branch_id: number, day: number, date: string): Promise<DoctorTimeSlotAvailable[]> {
         let connection: PoolConnection | null = null;

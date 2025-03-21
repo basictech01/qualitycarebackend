@@ -200,5 +200,34 @@ router.post('/service/reschedule',
     }
 )
 
+router.get('/doctor',
+    verifyClient,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            if(!req.userID) {
+                next(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const bookings = await bookingService.getAllDoctorBookingsForUser(req.userID!!);
+            res.send(bookings);
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.get('/service',
+    verifyClient,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            if(!req.userID) {
+                next(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const bookings = await bookingService.getAllServiceBookingsForUser(req.userID!!);
+            res.send(bookings);
+        } catch(e) {
+            next(e)
+        }
+    }
+)
 
 export default router;

@@ -1,11 +1,22 @@
 import { ERRORS, RequestError } from "@utils/error";
 import { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import createLogger from "@utils/logger";
-import { BookingDoctor, BookingServiceI } from "@models/booking";
+import { BookingDoctor, BookingDoctorView, BookingServiceI, BookingServiceView } from "@models/booking";
+import BookingService from "@services/booking";
 
 
 const logger = createLogger('@bookingRepository')
+interface BookingDoctorRow extends RowDataPacket, BookingDoctor {
+}
 
+interface BookingServiceIRow extends RowDataPacket, BookingServiceI {
+}
+
+interface BookingDoctorViewRow extends RowDataPacket, BookingDoctorView {
+}
+
+interface BookingServiceViewRow extends RowDataPacket, BookingServiceView {
+}
 export default class BookingRepository {
 
     async bookDoctor(connection: PoolConnection, doctor_id: number, time_slot_id: number, user_id: number, date: string): Promise<BookingDoctor> {
@@ -21,7 +32,7 @@ export default class BookingRepository {
 
     async getDoctorBooking(connection: PoolConnection, doctor_id: number, date: string): Promise<BookingDoctor[]> {
         try {
-            const [result,] = await connection.query<BookingDoctor[]>('SELECT * FROM booking_doctor WHERE doctor_id = ? AND date = ?', [doctor_id, date]);
+            const [result,] = await connection.query<BookingDoctorRow[]>('SELECT * FROM booking_doctor WHERE doctor_id = ? AND date = ?', [doctor_id, date]);
             return result;
         } catch (e) {
             logger.error(e)
@@ -31,7 +42,7 @@ export default class BookingRepository {
 
     async getDoctorBookingOrNull(connection: PoolConnection, doctor_id: number, date: string, time_slot_id: number): Promise<BookingDoctor | null> {
         try {
-            const [result,] = await connection.query<BookingDoctor[]>('SELECT * FROM booking_doctor WHERE doctor_id = ? AND date = ? AND time_slot_id = ?', [doctor_id, date, time_slot_id]);
+            const [result,] = await connection.query<BookingDoctorRow[]>('SELECT * FROM booking_doctor WHERE doctor_id = ? AND date = ? AND time_slot_id = ?', [doctor_id, date, time_slot_id]);
             if (result.length === 0) {
                 return null;
             }
@@ -64,7 +75,7 @@ export default class BookingRepository {
 
     async getBookingDoctor(connection: PoolConnection, booking_id: number): Promise<BookingDoctor> {
         try {
-            const [result,] = await connection.query<BookingDoctor[]>('SELECT * FROM booking_doctor WHERE id = ?', [booking_id]);
+            const [result,] = await connection.query<BookingDoctorRow[]>('SELECT * FROM booking_doctor WHERE id = ?', [booking_id]);
             if (result.length === 0) {
                 throw ERRORS.BOOKING_NOT_FOUND
             }
@@ -77,7 +88,7 @@ export default class BookingRepository {
 
     async getVisitCountByUser(connection: PoolConnection, user_id: number): Promise<number> {
         try {
-            const [result,] = await connection.query<BookingServiceI[]>('SELECT COUNT(*) as count FROM booking_service WHERE user_id = ?', [user_id]);
+            const [result,] = await connection.query<BookingServiceIRow[]>('SELECT COUNT(*) as count FROM booking_service WHERE user_id = ?', [user_id]);
             return result[0].count;
         } catch (e) {
             logger.error(e)
@@ -87,7 +98,7 @@ export default class BookingRepository {
 
     async getBookingDoctorOrNull(connection: PoolConnection, booking_id: number): Promise<BookingDoctor | null> {
         try {
-            const [result,] = await connection.query<BookingDoctor[]>('SELECT * FROM booking_doctor WHERE id = ?', [booking_id]);
+            const [result,] = await connection.query<BookingDoctorRow[]>('SELECT * FROM booking_doctor WHERE id = ?', [booking_id]);
             if (result.length === 0) {
                 return null;
             }
@@ -98,7 +109,7 @@ export default class BookingRepository {
         }
     }
 
-    async bookService(connection: PoolConnection, service_id: number, time_slot_id: number, user_id: number, date: string, branch_id: number): Promise<BookingServiceI> {
+    async bookService(connection: PoolConnection, service_id: number, time_slot_id: number, user_id: number, date: string, branch_id: number): Promise<BookingServiceIRow> {
         try {
             const [result,] = await connection.query<ResultSetHeader>('INSERT INTO booking_service (service_id, time_slot_id, user_id, date, branch_id) VALUES (?, ?, ?, ?, ?)', [service_id, time_slot_id, user_id, date, branch_id]);
             const booking_id = result.insertId;
@@ -109,9 +120,9 @@ export default class BookingRepository {
         }
     }
 
-    async getServiceBookingOrNull(connection: PoolConnection, service_id: number, date: string, time_slot_id: number, branch_id: number): Promise<BookingServiceI | null> {
+    async getServiceBookingOrNull(connection: PoolConnection, service_id: number, date: string, time_slot_id: number, branch_id: number): Promise<BookingServiceIRow | null> {
         try {
-            const [result,] = await connection.query<BookingServiceI[]>('SELECT * FROM booking_service WHERE service_id = ? AND date = ? AND time_slot_id = ? AND branch_id = ?', [service_id, date, time_slot_id, branch_id]);
+            const [result,] = await connection.query<BookingServiceIRow[]>('SELECT * FROM booking_service WHERE service_id = ? AND date = ? AND time_slot_id = ? AND branch_id = ?', [service_id, date, time_slot_id, branch_id]);
             if (result.length === 0) {
                 return null;
             }
@@ -122,9 +133,9 @@ export default class BookingRepository {
         }
     }
 
-    async getServiceBookingByIdOrNull(connection: PoolConnection, booking_id: number): Promise<BookingServiceI | null> {
+    async getServiceBookingByIdOrNull(connection: PoolConnection, booking_id: number): Promise<BookingServiceIRow | null> {
         try {
-            const [result,] = await connection.query<BookingServiceI[]>('SELECT * FROM booking_service WHERE id = ?', [booking_id]);
+            const [result,] = await connection.query<BookingServiceIRow[]>('SELECT * FROM booking_service WHERE id = ?', [booking_id]);
             if (result.length === 0) {
                 return null;
             }
@@ -135,9 +146,9 @@ export default class BookingRepository {
         }
     }
 
-    async getAllServiceBookingForSlot(connection: PoolConnection, service_id: number, date: string, time_slot_id: number, branch_id: number): Promise<BookingServiceI[]> {
+    async getAllServiceBookingForSlot(connection: PoolConnection, service_id: number, date: string, time_slot_id: number, branch_id: number): Promise<BookingServiceIRow[]> {
         try {
-            const [result,] = await connection.query<BookingServiceI[]>('SELECT * FROM booking_service WHERE service_id = ? AND date = ? AND time_slot_id = ? AND branch_id = ?', [service_id, date, time_slot_id, branch_id]);
+            const [result,] = await connection.query<BookingServiceIRow[]>('SELECT * FROM booking_service WHERE service_id = ? AND date = ? AND time_slot_id = ? AND branch_id = ?', [service_id, date, time_slot_id, branch_id]);
             return result;
         } catch (e) {
             logger.error(e)
@@ -145,9 +156,9 @@ export default class BookingRepository {
         }
     }
 
-    async getAllServiceBookingForBranch(connection: PoolConnection, service_id: number, branch_id: number, date: string): Promise<BookingServiceI[]> {
+    async getAllServiceBookingForBranch(connection: PoolConnection, service_id: number, branch_id: number, date: string): Promise<BookingServiceIRow[]> {
         try {
-            const [result,] = await connection.query<BookingServiceI[]>('SELECT * FROM booking_service WHERE service_id = ? AND date = ? AND branch_id = ?', [service_id, date, branch_id]);
+            const [result,] = await connection.query<BookingServiceIRow[]>('SELECT * FROM booking_service WHERE service_id = ? AND date = ? AND branch_id = ?', [service_id, date, branch_id]);
             return result;
         } catch (e) {
             logger.error(e)
@@ -155,9 +166,9 @@ export default class BookingRepository {
         }
     }
 
-    async getBookingService(connection: PoolConnection, booking_id: number): Promise<BookingServiceI> {
+    async getBookingService(connection: PoolConnection, booking_id: number): Promise<BookingServiceIRow> {
         try {
-            const [result,] = await connection.query<BookingServiceI[]>('SELECT * FROM booking_service WHERE id = ?', [booking_id]);
+            const [result,] = await connection.query<BookingServiceIRow[]>('SELECT * FROM booking_service WHERE id = ?', [booking_id]);
             if (result.length === 0) {
                 throw ERRORS.BOOKING_NOT_FOUND
             }
@@ -168,7 +179,7 @@ export default class BookingRepository {
         }
     }
 
-    async cancelService(connection: PoolConnection, booking_id: number): Promise<BookingServiceI> {
+    async cancelService(connection: PoolConnection, booking_id: number): Promise<BookingServiceIRow> {
         try {
             await connection.query('UPDATE booking_service set status = "CANCELED" where id = ?', [booking_id]);
             return await this.getBookingService(connection, booking_id);
@@ -178,7 +189,7 @@ export default class BookingRepository {
         }
     }
 
-    async completeService(connection: PoolConnection, booking_id: number): Promise<BookingServiceI> {
+    async completeService(connection: PoolConnection, booking_id: number): Promise<BookingServiceIRow> {
         try {
             await connection.query('UPDATE booking_service set status = "COMPLETED" where id = ?', [booking_id]);
             return await this.getBookingService(connection, booking_id);
@@ -210,7 +221,7 @@ export default class BookingRepository {
 
     async getAllDoctorBooking(connection: PoolConnection, doctor_id: number, date: string): Promise<BookingDoctor[]> {
         try {
-            const [result,] = await connection.query<BookingDoctor[]>('SELECT * FROM booking_doctor WHERE doctor_id = ? AND date = ?', [doctor_id, date]);
+            const [result,] = await connection.query<BookingDoctorRow[]>('SELECT * FROM booking_doctor WHERE doctor_id = ? AND date = ?', [doctor_id, date]);
             return result;
         } catch (e) {
             logger.error(e)
@@ -218,6 +229,63 @@ export default class BookingRepository {
         }
     }
 
+    async getAllDoctorBookingForUser(connection: PoolConnection, user_id: number): Promise<BookingDoctorView[]> {
+        
+        try {
+            const [result,] = await connection.query<BookingDoctorViewRow[]>(`SELECT 
+                                                                bd.id,
+                                                                bd.user_id,
+                                                                bd.status,
+                                                                dts.start_time,
+                                                                dts.end_time,
+                                                                b.name_en AS branch_name_en,
+                                                                b.name_ar AS branch_name_ar,
+                                                                d.name_en,
+                                                                d.name_ar,
+                                                                d.photo_url,
+                                                                bd.date
+                                                            FROM booking_doctor bd
+                                                            JOIN doctor d ON bd.doctor_id = d.id
+                                                            JOIN doctor_branch db ON d.id = db.doctor_id
+                                                            JOIN branch b ON db.branch_id = b.id
+                                                            JOIN doctor_time_slot dts ON dts.doctor_branch = db.id
+                                                            WHERE bd.time_slot_id = dts.id and user_id = ?`, [user_id]);
+            return result
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+    async getAllServiceBookingForUser(connection: PoolConnection, user_id: number): Promise<BookingServiceView[]> {
+        try {
+            const [result,] = await connection.query<BookingServiceViewRow[]>(`SELECT 
+                    bs.id,
+                    bs.user_id,
+                    bs.status,
+                    b.name_en AS branch_name_en,
+                    b.name_ar AS branch_name_ar,
+                    sts.start_time,
+                    sts.end_time,
+                    s.name_ar,
+                    s.name_en,
+                    sc.name_en AS category_name_en,
+                    sc.name_ar AS category_name_ar,
+                    s.service_image_en_url,
+                    s.service_image_ar_url,
+                    bs.date
+                FROM booking_service bs
+                JOIN branch b ON bs.branch_id = b.id
+                JOIN service s ON bs.service_id = s.id
+                JOIN service_category sc ON s.category_id = sc.id
+                JOIN service_time_slot sts ON bs.time_slot_id = sts.id
+                WHERE bs.user_id = ?`, [user_id]);
+            return result;
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }
 
 interface TotalSpend extends RowDataPacket {

@@ -55,7 +55,7 @@ export const DOCTOR_TIME_SLOT = `
 CREATE TABLE doctor_time_slot (
     id INT PRIMARY KEY,
     day INT NOT NULL,
-    doctor_branch INT NOT NULL,
+    doctor_id INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
 );
@@ -64,7 +64,7 @@ CREATE TABLE doctor_time_slot (
 export interface DoctorTimeSlot extends RowDataPacket {
     id: number;
     day: number;
-    doctor_branch: number;
+    doctor_id: number;
     start_time: string;
     end_time: string;
 }

@@ -41,6 +41,9 @@ const SCHEMA = {
         doctor_id: z.string(),
         branch_id: z.string(),
         day: z.string()
+    }),
+    GET_ALL_TIME_SLOT: z.object({
+        doctor_id: z.string(),
     })
 }
 
@@ -136,6 +139,21 @@ router.get('/time-slot',
             const day = parseInt(req.query.day as string);
 
             const timeSlots = await doctorService.getDoctorTimeSlot(doctor_id, branch_id, day);
+            res.json(successResponse(timeSlots));
+        } catch (e) {
+            next(e);
+        }
+    }
+)
+
+router.get('/all/time-slot',
+    validateRequest({
+        query: SCHEMA.GET_ALL_TIME_SLOT
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const doctor_id = parseInt(req.query.doctor_id as string);
+            const timeSlots = await doctorService.getAllDoctorTimeSlot(doctor_id);
             res.json(successResponse(timeSlots));
         } catch (e) {
             next(e);

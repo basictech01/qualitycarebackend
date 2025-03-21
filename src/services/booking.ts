@@ -1,5 +1,7 @@
-import { BookingDoctor, BookingServiceI } from "@models/booking";
+import { BookingDoctor, BookingDoctorView, BookingServiceI, BookingServiceView } from "@models/booking";
+import { Doctor } from "@models/doctor";
 import BookingRepository from "@repository/booking";
+import BranchRepository from "@repository/branch";
 import DoctorRepository from "@repository/doctor";
 import ServiceRepository from "@repository/service";
 import UserRepository from "@repository/user";
@@ -16,12 +18,14 @@ export default class BookingService {
     userRepository: UserRepository;
     serviceRepository: ServiceRepository;
     doctorRepository: DoctorRepository;
+    branchRepository: BranchRepository;
 
     constructor() {
         this.bookingRepository = new BookingRepository();
         this.userRepository = new UserRepository();
         this.serviceRepository = new ServiceRepository();
         this.doctorRepository = new DoctorRepository();
+        this.branchRepository = new BranchRepository();
     }
 
     async bookDoctor(doctor_id: number, time_slot_id: number, user_id: number, date: string): Promise<BookingDoctor> {
@@ -263,6 +267,39 @@ export default class BookingService {
             if (e instanceof RequestError) {
                 throw e;
             }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getAllDoctorBookingsForUser(user_id: number): Promise<BookingDoctorView[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const booking = await this.bookingRepository.getAllDoctorBookingForUser(connection, user_id);
+            return booking;
+
+        } catch (e) {
+            logger.error(e);
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getAllServiceBookingsForUser(user_id: number): Promise<BookingServiceView[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const booking = await this.bookingRepository.getAllServiceBookingForUser(connection, user_id);
+            return booking;
+        } catch (e) {
+            logger.error(e);
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {

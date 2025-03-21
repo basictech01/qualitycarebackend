@@ -163,6 +163,20 @@ export default class ServiceRepository {
         }
     }
 
+    async getServiceTimeSlotByIdOrNull(connection: PoolConnection, time_slot_id: number): Promise<ServiceTimeSlot | null> {
+        try {
+            const [timeSlots,] = await connection.query<ServiceTimeSlot[]>('SELECT * from service_time_slot WHERE id = ?', [time_slot_id]);
+            if (timeSlots.length === 0) {
+                return null;
+            }
+            return timeSlots[0];
+        }
+        catch (error) {
+            logger.error(`Error getting service time slot: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
+
     async createServiceTimeSlot(connection: PoolConnection, service_id: number, start_time: string, end_time: string): Promise<ServiceTimeSlot> {
         try {
             const [result] = await connection.query<ResultSetHeader>(

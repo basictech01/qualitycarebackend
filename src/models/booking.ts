@@ -14,12 +14,14 @@ CREATE TABLE booking_service (
 );
 `
 
-export interface BookingServiceI extends RowDataPacket {
+export interface BookingServiceI {
     id: number;
     user_id: number;
     status: 'SCHEDULED' | 'CANCELED' | 'REFUND_INITIATED' | 'REFUND_COMPLETED' | 'COMPLETED';
     service_id: number;
     time_slot_id: number;
+    date: string;
+    branch_id: number;
 }
 
 const DEFINATION_BOOKING = `
@@ -33,11 +35,43 @@ CREATE TABLE booking_doctor (
 );
 `
 
-export interface BookingDoctor extends RowDataPacket {
+export interface BookingDoctor {
     id: number;
     user_id: number;
     status: 'SCHEDULED' | 'CANCELED' | 'REFUND_INITIATED' | 'REFUND_COMPLETED' | 'COMPLETED';
     doctor_id: number;
     time_slot_id: number;
+    date: string;
+}
+
+export interface BookingDoctorView {
+    id: number;
+    user_id: number;
+    status: 'SCHEDULED' | 'CANCELED' | 'REFUND_INITIATED' | 'REFUND_COMPLETED' | 'COMPLETED';
+    start_time: string;
+    end_time: string;
+    branch_name_en: string;
+    branch_name_ar: string;
+    name_ar: string;
+    name_en: string;
+    photo_url: string;
+    date: string;
+}
+
+export interface BookingServiceView {
+    id: number;
+    user_id: number;
+    status: 'SCHEDULED' | 'CANCELED' | 'REFUND_INITIATED' | 'REFUND_COMPLETED' | 'COMPLETED';
+    branch_name_en: string;
+    branch_name_ar: string;
+    start_time: string;
+    end_time: string;
+    name_ar: string;
+    name_en: string;
+    category_name_en: string;
+    category_name_ar: string;
+    service_image_en_url: string;
+    service_image_ar_url: string;
+    date: string;
 }
 

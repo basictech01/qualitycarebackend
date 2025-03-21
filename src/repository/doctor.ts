@@ -159,4 +159,24 @@ export default class DoctorRepository {
         }
     }
 
+    async getAllDoctorTimeSlot(conn: PoolConnection, doctorId: number): Promise<DoctorTimeSlot[]> {
+        try {
+            const [rows] = await conn.query<DoctorTimeSlot[]>('SELECT * FROM doctor_time_slot WHERE doctor_id = ?', [doctorId]);
+            return rows;
+        } catch (e) {
+            logger.error(e);
+            throw e;
+        }
+    }
+
+    async getAllDoctorBranch(conn: PoolConnection, doctorId: number): Promise<DoctorBranch[]> {
+        try {
+            const [rows] = await conn.query<DoctorBranch[]>('SELECT * FROM doctor_branch WHERE doctor_id = ?', [doctorId]);
+            return rows;
+        } catch (e) {
+            logger.error(e);
+            throw e;
+        }
+    }
+
 }

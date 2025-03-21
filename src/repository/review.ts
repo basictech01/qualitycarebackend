@@ -93,4 +93,23 @@ export default class ReviewRepository {
         }
     }
 
+    async getAllReviewsForDoctor(connection: PoolConnection, doctorID: number): Promise<Review[]> {
+        try {
+            const [reviews,] = await connection.query<Review[]>('SELECT * from review where booking_id in (SELECT id from booking_doctor where doctor_id = ?)', [doctorID]);
+            return reviews;
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+    async getAllReviewsForService(connection: PoolConnection, serviceID: number): Promise<Review[]> {
+        try {
+            const [reviews,] = await connection.query<Review[]>('SELECT * from review where booking_id in (SELECT id from booking_service where service_id = ?)', [serviceID]);
+            return reviews;
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }

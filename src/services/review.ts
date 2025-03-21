@@ -97,4 +97,34 @@ export default class ReviewService {
             }
         }
     }
+
+    async getAllReviewsForDoctor(doctorID: number): Promise<Review[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            return await this.reviewRepository.getAllReviewsForDoctor(connection, doctorID);
+        } catch (e) {
+            logger.error(e);
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getAllReviewsForService(doctorID: number): Promise<Review[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            return await this.reviewRepository.getAllReviewsForService(connection, doctorID);
+        } catch (e) {
+            logger.error(e);
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
 }
