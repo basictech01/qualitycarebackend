@@ -57,6 +57,7 @@ export interface ServiceView {
     type: string;
     category_en: string;
     category_ar: string;
+    category_id: number;
     about_en: string;
     about_ar: string;
     actual_price: number;
@@ -76,6 +77,7 @@ export function createServiceView(service: Service, serviceCategory: ServiceCate
         type: serviceCategory.type,
         category_en: serviceCategory.name_en,
         category_ar: serviceCategory.name_en,
+        category_id: service.category_id,
         actual_price: service.actual_price,
         discounted_price: service.discounted_price,
         service_image_en_url: service.service_image_en_url,
