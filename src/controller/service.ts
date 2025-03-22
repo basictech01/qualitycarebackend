@@ -44,6 +44,13 @@ const SCHEMA = {
         image_en: z.string(),
         type: z.enum(['DENTIST', 'DERMATOLOGIST'])
     }),
+    UPDATE_SERVICE_CATEGORY: z.object({
+        name_en: z.string().optional(),
+        name_ar: z.string().optional(),
+        image_ar: z.string().optional(),
+        image_en: z.string().optional(),
+        type: z.enum(['DENTIST', 'DERMATOLOGIST']).optional()
+    }),
     CREATE_TIME_SLOT: z.object({
         service_id: z.number(),
         start_time: z.string().time(),
@@ -142,6 +149,23 @@ router.post('/category',
         try {
             const body: z.infer<typeof SCHEMA.CREATE_SERVICE_CATEGORY> = req.body;
             const category = await serviceService.createCategory(body.name_en, body.name_ar, body.image_ar, body.image_en, body.type);
+            res.json(successResponse(category));
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
+router.put('/category/:category_id',
+    verifyAdmin,
+    validateRequest({
+        body: SCHEMA.UPDATE_SERVICE_CATEGORY
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const body: z.infer<typeof SCHEMA.UPDATE_SERVICE_CATEGORY> = req.body;
+            const category_id = parseInt(req.params.category_id);
+            const category = await serviceService.updateCategory(category_id, body.name_ar, body.name_en, body.image_ar, body.image_en, body.type);
             res.json(successResponse(category));
         } catch (error) {
             next(error);

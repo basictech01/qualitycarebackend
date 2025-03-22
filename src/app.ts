@@ -29,7 +29,7 @@ async function start() {
 
     // Start server here
     const app: Application = express()
-    app.use(bodyParser.json())
+    app.use(bodyParser.json({ limit: '50mb' }));
     app.use(cors());
     app.use(morgan('combined'))
 

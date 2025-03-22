@@ -127,6 +127,20 @@ export default class ServiceRepository {
         }
     }
 
+    async updateCategory(connection: PoolConnection, id: number, name_en: string, name_ar: string, image_ar: string, image_en: string, type: string): Promise<ServiceCategory> {
+        try {
+            await connection.query<ResultSetHeader>(
+                'UPDATE service_category SET name_en = ?, name_ar = ?, image_ar = ?, image_en = ?, type = ? WHERE id = ?',
+                [name_en, name_ar, image_ar, image_en, type, id]
+            );
+            const updatedCategory = await this.getServiceCategoryById(connection, id);
+            return updatedCategory;
+        } catch (error) {
+            logger.error(`Error updating category: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
+
     async getAllServicesByCategory(connection: PoolConnection, category_id: number): Promise<Service[]> {
         try {
             const [services,] = await connection.query<ServiceRow[]>('SELECT * from service WHERE category_id = ?', [category_id]);

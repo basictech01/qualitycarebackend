@@ -156,7 +156,10 @@ export default class SettingService {
             }
             return serviceViews;
         } catch (error) {
-            logger.error(`Error getting all settings: ${error}`);
+            if(error instanceof RequestError) {
+                throw error;
+            }
+            logger.error(`Error updating service: ${error}`);
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {
@@ -183,6 +186,41 @@ export default class SettingService {
             }
         }
     }
+
+    async updateCategory(category_id: number, name_en: string | undefined, name_ar: string | undefined, image_ar: string | undefined, image_en: string | undefined, type: string | undefined): Promise<ServiceCategory> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            let category = await this.serviceRepository.getServiceCategoryByIdOrNull(connection, category_id);
+            if (!category) {
+                throw ERRORS.INVALID_SERVICE_CATEGORY;
+            }
+            if (name_ar) {
+                category.name_ar = name_ar;
+            }
+            if (name_en) {
+                category.name_en = name_en;
+            }
+            if (image_ar) {
+                category.image_ar = image_ar;
+            }
+            if (image_en) {
+                category.image_en = image_en;
+            }
+            if (type) {
+                category.type = type;
+            }
+            const newCategory = await this.serviceRepository.updateCategory(connection, category_id, category.name_en, category.name_ar, category.image_ar, category.image_en, category.type);
+            return newCategory;
+        } catch (error) {
+            if(error instanceof RequestError) {
+                throw error;
+            }
+            logger.error(`Error updating service: ${error}`);
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        }
+    }
+        
 
     async getTimeSlots(service_id: number): Promise<ServiceTimeSlot[]> {
         let connection: PoolConnection | null = null;
