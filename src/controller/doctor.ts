@@ -60,6 +60,18 @@ router.get('/',
     }
 )
 
+router.get('/:id',
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const doctor_id = parseInt(req.params.id);
+            const doctors = await doctorService.getDoctorsFromID(doctor_id);
+            res.json(successResponse(doctors));
+        } catch (e) {
+            next(e);
+        }
+    }
+)
+
 router.post('/',
     verifyAdmin,
     validateRequest({

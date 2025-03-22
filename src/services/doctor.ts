@@ -21,6 +21,25 @@ export default class DoctorService {
         this.bookingRepository = new BookingRepository();
     }
 
+    async getDoctorsFromID(id: number): Promise<Doctor> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            return await this.doctorRepository.getDoctorById(connection, id);
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
     async getAllDoctors(): Promise<Doctor[]> {
         let connection: PoolConnection | null = null;
         try {
