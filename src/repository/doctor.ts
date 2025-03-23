@@ -102,9 +102,9 @@ export default class DoctorRepository {
         }
     }
 
-    async createDoctorTimeSlot(conn: PoolConnection, doctor_branch_id: number, end_time: string, start_time: string): Promise<DoctorTimeSlot> {
+    async createDoctorTimeSlot(conn: PoolConnection, doctor_id: number, end_time: string, start_time: string): Promise<DoctorTimeSlot> {
         try {
-            const [rows] = await conn.query<ResultSetHeader>('INSERT INTO doctor_time_slot (doctor_id, end_time, start_time) VALUES (?, ?, ?)', [doctor_branch_id, end_time, start_time]);
+            const [rows] = await conn.query<ResultSetHeader>('INSERT INTO doctor_time_slot (doctor_id, end_time, start_time) VALUES (?, ?, ?)', [doctor_id, end_time, start_time]);
             const doctorTimeSlot = await this.getDoctorTimeSlotById(conn, rows.insertId);
             return doctorTimeSlot;
         } catch (e) {

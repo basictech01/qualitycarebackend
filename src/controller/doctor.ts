@@ -33,7 +33,6 @@ const SCHEMA = {
     }),
     CREATE_DOCTOR_TIME_SLOT: z.object({
         doctor_id: z.number(),
-        branch_id: z.number(),
         start_time: z.string().time(),
         end_time: z.string().time()
     }),
@@ -53,18 +52,6 @@ router.get('/',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const doctors = await doctorService.getAllDoctors();
-            res.json(successResponse(doctors));
-        } catch (e) {
-            next(e);
-        }
-    }
-)
-
-router.get('/:id',
-    async function(req: Request, res: Response, next: NextFunction) {
-        try {
-            const doctor_id = parseInt(req.params.id);
-            const doctors = await doctorService.getDoctorsFromID(doctor_id);
             res.json(successResponse(doctors));
         } catch (e) {
             next(e);
@@ -132,7 +119,7 @@ router.post('/time-slot',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const body: z.infer<typeof SCHEMA.CREATE_DOCTOR_TIME_SLOT> = req.body
-            const timeSlots = await doctorService.crateDoctorTimeSlot(body.doctor_id, body.start_time, body.end_time, body.branch_id);
+            const timeSlots = await doctorService.crateDoctorTimeSlot(body.doctor_id, body.start_time, body.end_time);
             res.json(successResponse(timeSlots));
         } catch (e) {
             next(e);
@@ -205,5 +192,17 @@ router.get('/featured',
     }
 })
 
+
+router.get('/:id',
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const doctor_id = parseInt(req.params.id);
+            const doctors = await doctorService.getDoctorsFromID(doctor_id);
+            res.json(successResponse(doctors));
+        } catch (e) {
+            next(e);
+        }
+    }
+)
 
 export default router;

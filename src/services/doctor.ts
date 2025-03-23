@@ -158,7 +158,7 @@ export default class DoctorService {
         }
     }
 
-    async crateDoctorTimeSlot(doctor_id: number, start_time: string, end_time: string, branch_id: number): Promise<DoctorTimeSlotView> {
+    async crateDoctorTimeSlot(doctor_id: number, start_time: string, end_time: string): Promise<DoctorTimeSlotView> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -166,14 +166,9 @@ export default class DoctorService {
             if (!doctor) {
                 throw ERRORS.DOCTOR_NOT_FOUND;
             }
-            const doctorBranch = await this.doctorRepository.getDoctorBranch(connection, doctor_id, branch_id);
-            if (!doctorBranch) {
-                throw ERRORS.DOCTOR_NOT_ASSIGNED_TO_BRANCH;
-            }
-            await this.doctorRepository.createDoctorTimeSlot(connection, doctorBranch.id, start_time, end_time);
+            await this.doctorRepository.createDoctorTimeSlot(connection, doctor_id, start_time, end_time);
             return {
                 doctor_id: doctor_id,
-                branch_id: branch_id,
                 start_time: start_time,
                 end_time: end_time
             }

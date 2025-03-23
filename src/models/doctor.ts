@@ -71,7 +71,6 @@ export interface DoctorTimeSlot  {
 
 export interface DoctorTimeSlotView  {
     doctor_id: number;
-    branch_id: number;
     start_time: string;
     end_time: string;
 }
