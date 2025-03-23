@@ -139,13 +139,15 @@ CREATE TABLE service_time_slot (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     service_id INT NOT NULL,
     start_time TIME NOT NULL,
-    end_time TIME NOT NULL
+    end_time TIME NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE service_branch (
     service_id INT NOT NULL,
     branch_id INT NOT NULL,
     maximum_booking_per_slot INT,
+    is_active BOOLEAN DEFAULT TRUE
     PRIMARY KEY (branch_id, service_id)
 );
 

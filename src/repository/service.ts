@@ -40,6 +40,18 @@ export default class ServiceRepository {
         }
     }
 
+    async setAllServiceTimeSlotsInactive(connection: PoolConnection, service_id: number): Promise<void> {
+        try {
+            await connection.query<ResultSetHeader>(
+                'UPDATE service_time_slot SET is_active = 0 WHERE service_id = ?',
+                [service_id]
+            );
+        } catch (error) {
+            logger.error(`Error setting all service time slots inactive: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
+
     async getServiceByIdOrNull(connection: PoolConnection, service_id: number): Promise<Service | null> {
         try {
             const [services,] = await connection.query<ServiceRow[]>('SELECT * from service WHERE id = ?', [service_id]);
@@ -171,7 +183,7 @@ export default class ServiceRepository {
 
     async getTimeSlots(connection: PoolConnection, service_id: number): Promise<ServiceTimeSlot[]> {
         try {
-            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE service_id = ?', [service_id]);
+            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE service_id = ? and is_active = 1', [service_id]);
             return timeSlots;
         } catch (e) {
             if (e instanceof RequestError) {
@@ -184,7 +196,7 @@ export default class ServiceRepository {
 
     async getServiceTimeSlotByIdOrNull(connection: PoolConnection, time_slot_id: number): Promise<ServiceTimeSlot | null> {
         try {
-            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE id = ?', [time_slot_id]);
+            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE id = ? and is_active = 1', [time_slot_id]);
             if (timeSlots.length === 0) {
                 return null;
             }
@@ -196,14 +208,51 @@ export default class ServiceRepository {
         }
     }
 
+    async searchServiceTimeSlot(connection: PoolConnection, service_id: number, start_time: string, end_time: string): Promise<ServiceTimeSlot | null> {
+        try {
+            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE service_id = ? AND start_time = ? AND end_time = ?', [service_id, start_time, end_time]);
+            if (timeSlots.length === 0) {
+                return null;
+            }
+            return timeSlots[0];
+        }
+        catch (error) {
+            logger.error(`Error getting service time slot: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
+
+    async setActiveDoctorTimeSlot(connection: PoolConnection, time_slot_id: number, is_active: boolean): Promise<ServiceTimeSlot> {
+        try {
+            await connection.query<ResultSetHeader>(
+                'UPDATE service_time_slot SET is_active = ? WHERE id = ?',
+                [is_active, time_slot_id]
+            );
+            const updatedTimeSlot = await this.getServiceTimeSlotByIdOrNull(connection, time_slot_id);
+            if (!updatedTimeSlot) {
+                throw ERRORS.SERVICE_TIME_SLOT_NOT_FOUND;
+            }
+            return updatedTimeSlot;
+        } catch (error) {
+            logger.error(`Error updating service time slot: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
+
     async createServiceTimeSlot(connection: PoolConnection, service_id: number, start_time: string, end_time: string): Promise<ServiceTimeSlot> {
         try {
-            const [result] = await connection.query<ResultSetHeader>(
-                'INSERT INTO service_time_slot (service_id, start_time, end_time) VALUES (?, ?, ?)',
-                [service_id, start_time, end_time]
-            );
-            const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE id = ?', [result.insertId]);
-            return timeSlots[0];
+            const service_time_slots = await this.searchServiceTimeSlot(connection, service_id, start_time, end_time);
+            if (service_time_slots) {
+                const doctorTimeSlot = await this.setActiveDoctorTimeSlot(connection, service_time_slots.id, true);
+                return doctorTimeSlot;
+            } else {
+                const [result] = await connection.query<ResultSetHeader>(
+                    'INSERT INTO service_time_slot (service_id, start_time, end_time) VALUES (?, ?, ?)',
+                    [service_id, start_time, end_time]
+                );
+                const [timeSlots,] = await connection.query<ServiceTimeSlotRow[]>('SELECT * from service_time_slot WHERE id = ?', [result.insertId]);
+                return timeSlots[0];
+            }
         } catch (error) {
             logger.error(`Error creating service time slot: ${error}`);
             throw ERRORS.DATABASE_ERROR;
@@ -226,6 +275,53 @@ export default class ServiceRepository {
         } catch (error) {
             logger.error(`Error adding service to branch: ${error}`);
             throw ERRORS.DATABASE_ERROR;
+        }
+    }
+    async updateServiceBranchActiveAndMaxTimeSlot(connection: PoolConnection, service_id: number, branch_id: number, is_active: boolean, maximum_booking_per_slot: number): Promise<ServiceBranch> {
+        try {
+            await connection.query<ResultSetHeader>(
+                'UPDATE service_branch SET is_active = ?, maximum_booking_per_slot = ? WHERE service_id = ? AND branch_id = ?',
+                [is_active, maximum_booking_per_slot, service_id, branch_id]
+            );
+            const [serviceBranch,] = await connection.query<ServiceBranchRow[]>('SELECT * from service_branch WHERE service_id = ? AND branch_id = ?', [service_id, branch_id]);
+            return serviceBranch[0];
+        }
+        catch (error) {
+            logger.error(`Error updating service branch: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
+
+    async createServiceBranch(connection: PoolConnection, service_id: number, branch_id: number, maximum_booking_per_slot: number): Promise<ServiceBranch> {
+        try {
+            const service_branch = await this.getServiceBranchOrNull(connection, service_id, branch_id);
+            if (service_branch) {
+                return this.updateServiceBranchActiveAndMaxTimeSlot(connection, service_branch.service_id, service_branch.branch_id, true, maximum_booking_per_slot);
+            } else {
+                const [result] = await connection.query<ResultSetHeader>(
+                    'INSERT INTO service_branch (branch_id, service_id, maximum_booking_per_slot) VALUES (?, ?, ?)',
+                    [branch_id, service_id, maximum_booking_per_slot]
+                );
+                
+                return {
+                    branch_id,
+                    service_id,
+                    maximum_booking_per_slot,
+                    is_active: true
+                }
+            }
+        } catch (error) {
+            logger.error(`Error creating service branch: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
+
+    async setAllServiceBranchesInactive(connection: PoolConnection, service_id: number): Promise<void> {
+        try {
+            await connection.query('UPDATE service_branch SET is_active = 0 WHERE service_id = ?', [service_id]);
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
         }
     }
 

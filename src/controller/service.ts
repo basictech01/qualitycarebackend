@@ -7,6 +7,7 @@ import { z } from "zod";
 import validateRequest from "@middleware/validaterequest";
 import ServiceService from '@services/service';
 import { successResponse } from "@utils/reponse";
+import { time } from "console";
 
 var router = Router();
 
@@ -56,10 +57,38 @@ const SCHEMA = {
         start_time: z.string().time(),
         end_time: z.string().time()
     }),
+    CREATE_TIME_SLOTS: z.object({
+        service_id: z.number(),
+        time_slots: z.array(z.object({
+            start_time: z.string().time(),
+            end_time: z.string().time()
+        }))
+    }),
+    UPDATE_TIME_SLOTS: z.object({
+        service_id: z.number(),
+        time_slots: z.array(z.object({
+            start_time: z.string().time(),
+            end_time: z.string().time()
+        }))
+    }),
     ADD_SERVICE_TO_BRANCH: z.object({
         service_id: z.number(),
         branch_id: z.number(),
         maximum_booking_per_slot: z.number()
+    }),
+    ADD_SERVICE_TO_BRANCHES: z.object({
+        service_id: z.number(),
+        branches: z.array(z.object({
+            branch_id: z.number(),
+            maximum_booking_per_slot: z.number()
+        }))
+    }),
+    UPDATE_SERVICE_BRANCHES: z.object({
+        service_id: z.number(),
+        branches: z.array(z.object({
+            branch_id: z.number(),
+            maximum_booking_per_slot: z.number()
+        }))
     })
         
 }
@@ -92,24 +121,6 @@ router.post('/',
         }
     }
 )
-
-router.put('/:service_id',
-    verifyAdmin,
-    validateRequest({
-        body: SCHEMA.UPDATE_SERVICE
-    }),
-    async function(req: Request, res: Response, next: NextFunction) {
-        try {
-            const body: z.infer<typeof SCHEMA.UPDATE_SERVICE> = req.body;
-            const service_id = parseInt(req.params.service_id);
-            const service = await serviceService.update(service_id, body.name_en, body.name_ar, body.category_id, body.about_en, body.about_ar, body.actual_price, body.discounted_price, body.service_image_en_url, body.service_image_ar_url, body.can_redeem);
-            res.json(successResponse(service));
-        } catch (error) {
-            next(error);
-        }
-    }
-)
-
 // Get all services for a category
 router.get('/all/category',
     validateRequest({
@@ -173,7 +184,7 @@ router.put('/category/:category_id',
     }
 )
 
-router.get('/time_slot',
+router.get('/time_slots',
     validateRequest({
         query: z.object({
             service_id: z.string(),
@@ -182,8 +193,6 @@ router.get('/time_slot',
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const service_id = parseInt(req.query.service_id as string);
-            const date_string = req.query.date as string;
-            const date = new Date(date_string);
             const timeSlots = await serviceService.getTimeSlots(service_id);
             res.json(successResponse(timeSlots));
         } catch (error) {
@@ -230,6 +239,38 @@ router.post('/time_slot',
     }
 )
 
+router.post('/time_slots',
+    verifyAdmin,
+    validateRequest({
+        body: SCHEMA.CREATE_TIME_SLOTS
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const body: z.infer<typeof SCHEMA.CREATE_TIME_SLOTS> = req.body;
+            const timeSlot = await serviceService.createServiceTimeSlots(body.service_id, body.time_slots);
+            res.json(successResponse(timeSlot));
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
+router.put('/time_slots',
+    verifyAdmin,
+    validateRequest({
+        body: SCHEMA.UPDATE_TIME_SLOTS
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const body: z.infer<typeof SCHEMA.UPDATE_TIME_SLOTS> = req.body;
+            const timeSlot = await serviceService.updateServiceTimeSlots(body.service_id, body.time_slots);
+            res.json(successResponse(timeSlot));
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
 // Get all services for a branch
 router.get('/branch',
     validateRequest({
@@ -264,6 +305,38 @@ router.post('/branch',
     }
 )
 
+router.post('/branches',
+    verifyAdmin,
+    validateRequest({
+        body: SCHEMA.ADD_SERVICE_TO_BRANCHES
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const body: z.infer<typeof SCHEMA.ADD_SERVICE_TO_BRANCHES> = req.body;
+            const branch = await serviceService.addServiceToBranches(body.service_id, body.branches);
+            res.json(successResponse(branch));
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
+router.put('/branches',
+    verifyAdmin,
+    validateRequest({
+        body: SCHEMA.UPDATE_SERVICE_BRANCHES
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const body: z.infer<typeof SCHEMA.UPDATE_SERVICE_BRANCHES> = req.body;
+            const branch = await serviceService.updateServiceToBranches(body.service_id, body.branches);
+            res.json(successResponse(branch));
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
 // get all services that can be redeemed
 router.get('/can_redeem',
     async function(req: Request, res: Response, next: NextFunction) {
@@ -275,5 +348,23 @@ router.get('/can_redeem',
         }
     }
 )
+
+router.put('/:service_id',
+    verifyAdmin,
+    validateRequest({
+        body: SCHEMA.UPDATE_SERVICE
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const body: z.infer<typeof SCHEMA.UPDATE_SERVICE> = req.body;
+            const service_id = parseInt(req.params.service_id);
+            const service = await serviceService.update(service_id, body.name_en, body.name_ar, body.category_id, body.about_en, body.about_ar, body.actual_price, body.discounted_price, body.service_image_en_url, body.service_image_ar_url, body.can_redeem);
+            res.json(successResponse(service));
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
 
 export default router;

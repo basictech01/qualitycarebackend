@@ -91,7 +91,8 @@ CREATE TABLE service_time_slot (
     id INT PRIMARY KEY,
     service_id INT,
     start_time TIME,
-    end_time TIME
+    end_time TIME,
+    is_active BOOLEAN DEFAULT TRUE
 );
 `
 
@@ -115,6 +116,7 @@ CREATE TABLE service_branch (
     service_id INT,
     branch_id INT,
     maximum_booking_per_slot INT,
+    is_active BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (branch_id, service_id)
 );`
 
@@ -122,6 +124,7 @@ export interface ServiceBranch  {
     service_id: number;
     branch_id: number;
     maximum_booking_per_slot: number;
+    is_active: boolean;
 }
 
 

@@ -5,6 +5,7 @@ import ServiceRepository from "@repository/service";
 import pool from "@utils/db";
 import { ERRORS, RequestError } from "@utils/error";
 import createLogger from "@utils/logger";
+import { log } from "console";
 import e from "express";
 
 import { PoolConnection } from "mysql2/promise";
@@ -317,6 +318,67 @@ export default class SettingService {
         }
     }
 
+    async createServiceTimeSlots(service_id: number, time_slots: {start_time: string, end_time: string}[]): Promise<ServiceTimeSlot[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const service = await this.serviceRepository.getServiceById(connection, service_id);
+            if (!service) {
+                throw ERRORS.SERVICE_NOT_FOUND;
+            }
+            const timeSlots: ServiceTimeSlot[] = [];
+            for(const time_slot of time_slots) {
+                if (!time_slot.start_time || !time_slot.end_time) {
+                    throw ERRORS.INVALID_TIME_SLOT;
+                }
+                const timeSlot = await this.serviceRepository.createServiceTimeSlot(connection, service_id, time_slot.start_time, time_slot.end_time);
+                timeSlots.push(timeSlot);
+            }
+            return timeSlots;
+        } catch (error) {
+            if (error instanceof RequestError) {
+                throw error;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                await connection.rollback();
+                connection.release();
+            }
+        }
+    }
+
+    async updateServiceTimeSlots(service_id: number, time_slots: {start_time: string, end_time: string}[]): Promise<ServiceTimeSlot[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const service = await this.serviceRepository.getServiceByIdOrNull(connection, service_id);
+            if (!service) {
+                throw ERRORS.SERVICE_NOT_FOUND;
+            }
+            const timeSlots: ServiceTimeSlot[] = [];
+            await this.serviceRepository.setAllServiceTimeSlotsInactive(connection, service_id);
+            for(const time_slot of time_slots) {
+                if (!time_slot.start_time || !time_slot.end_time) {
+                    throw ERRORS.INVALID_TIME_SLOT;
+                }
+                const timeSlot = await this.serviceRepository.createServiceTimeSlot(connection, service_id, time_slot.start_time, time_slot.end_time);
+                timeSlots.push(timeSlot);
+            }
+            return timeSlots;
+        } catch (error) {
+            if (error instanceof RequestError) {
+                throw error;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                await connection.rollback();
+                connection.release();
+            }
+        }
+    }
+
     async getServicesForBranch(branch_id: number): Promise<ServiceView[]> {
         let connection: PoolConnection | null = null;
         try {
@@ -365,10 +427,6 @@ export default class SettingService {
             if (!branch) {
                 throw ERRORS.BRANCH_NOT_FOUND;
             }
-            const service_branch = await this.serviceRepository.getServiceBranchOrNull(connection, service_id, branch_id) 
-            if (service_branch) {
-                throw ERRORS.SERVICE_ALREADY_ADDED_TO_BRANCH;
-            }
             const serviceBranch = await this.serviceRepository.addServiceToBranch(connection, service_id, branch_id, maximum_booking_per_slot);
             return serviceBranch;
         } catch (error) {
@@ -383,6 +441,70 @@ export default class SettingService {
             }
         }
     }
+
+    async addServiceToBranches(service_id: number, branches: {branch_id: number, maximum_booking_per_slot: number}[]): Promise<ServiceBranch[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const service = await this.serviceRepository.getServiceById(connection, service_id);
+            if (!service) {
+                throw ERRORS.SERVICE_NOT_FOUND;
+            }
+            const serviceBranches: ServiceBranch[] = [];
+            for(const branch of branches) {
+                const branch_new = await this.branchRepository.getBranchByIdOrNull(connection, branch.branch_id);
+                if (!branch_new) {
+                    throw ERRORS.BRANCH_NOT_FOUND;
+                }
+                const service_branch = await this.serviceRepository.createServiceBranch(connection, service_id, branch.branch_id, branch.maximum_booking_per_slot);
+                serviceBranches.push(service_branch);
+            }
+            return serviceBranches;
+        } catch (error) {
+            if (error instanceof RequestError) {
+                throw error;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                await connection.rollback();
+                connection.release();
+            }
+        }
+    }
+
+    async updateServiceToBranches(service_id: number, branches: {branch_id: number, maximum_booking_per_slot: number}[]): Promise<ServiceBranch[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const service = await this.serviceRepository.getServiceById(connection, service_id);
+            if (!service) {
+                throw ERRORS.SERVICE_NOT_FOUND;
+            }
+            const serviceBranches: ServiceBranch[] = [];
+            await this.serviceRepository.setAllServiceBranchesInactive(connection, service_id);
+            for(const branch of branches) {
+                const branch_new = await this.branchRepository.getBranchByIdOrNull(connection, branch.branch_id);
+                if (!branch_new) {
+                    throw ERRORS.BRANCH_NOT_FOUND;
+                }
+                const service_branch = await this.serviceRepository.createServiceBranch(connection, service_id, branch.branch_id, branch.maximum_booking_per_slot);
+                serviceBranches.push(service_branch);
+            }
+            return serviceBranches;
+        } catch (error) {
+            if (error instanceof RequestError) {
+                throw error;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                await connection.rollback();
+                connection.release();
+            }
+        }
+    }
+
 
     async getRedeemableServices(): Promise<ServiceView[]> {
         let connection: PoolConnection | null = null;

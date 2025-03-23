@@ -232,15 +232,13 @@ router.put('/time-slots',
     }
 )
 
-router.get('/time-slot',
+router.get('/time-slots',
     validateRequest({
         query: SCHEMA.GET_TIME_SLOT
     }),
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const doctor_id = parseInt(req.query.doctor_id as string);
-            const day = parseInt(req.query.day as string);
-
             const timeSlots = await doctorService.getDoctorTimeSlot(doctor_id);
             res.json(successResponse(timeSlots));
         } catch (e) {
