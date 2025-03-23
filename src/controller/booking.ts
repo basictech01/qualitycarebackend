@@ -6,6 +6,7 @@ import { ERRORS } from "@utils/error";
 import { date, z } from "zod";
 import validateRequest from "@middleware/validaterequest";
 import BookingService from '@services/booking';
+import { successResponse } from "@utils/reponse";
 
 var router = Router();
 
@@ -59,7 +60,7 @@ router.post('/doctor',
             }
             const body: z.infer<typeof SCHEMA.DOCTOR> = req.body;
             const booking = await bookingService.bookDoctor(body.doctor_id, body.time_slot_id, req.userID!!, body.date);
-            res.send(booking);
+            res.send(successResponse(booking));
         } catch(e) {
             next(e)
         }
@@ -78,7 +79,7 @@ router.post('/doctor/cancel',
             }
             const body: z.infer<typeof SCHEMA.DOCTOR_CANCEL> = req.body;
             const booking = await bookingService.cancelDoctor(body.booking_id, req.userID!!, req.isAdmin ?? false);
-            res.send(booking);
+            res.send(successResponse(booking));
         } catch(e) {
             next(e)
         }
@@ -97,7 +98,7 @@ router.post('/doctor/complete',
             }
             const body: z.infer<typeof SCHEMA.DOCTOR_COMPLETE> = req.body;
             const booking = await bookingService.completeDoctor(body.booking_id, req.userID!!, req.isAdmin ?? false);
-            res.send(booking);
+            res.send(successResponse(booking));
         } catch(e) {
             next(e)
         }
@@ -116,7 +117,7 @@ router.post('/doctor/reschedule',
             }
             const body: z.infer<typeof SCHEMA.DOCTOR_RESCHEDULE> = req.body;
             const booking = await bookingService.rescheduleDoctor(body.booking_id, body.time_slot_id, req.userID!!, body.date, req.isAdmin ?? false);
-            res.send(booking);
+            res.send(successResponse(booking));
         } catch(e) {
             next(e)
         }
@@ -135,7 +136,7 @@ router.post('/service',
             }
             const body: z.infer<typeof SCHEMA.SERVICE> = req.body;
             const booking = await bookingService.bookService(body.service_id, body.time_slot_id, req.userID!!, body.date, body.branch_id);
-            res.send(booking);
+            res.send(successResponse(booking));
         } catch(e) {
             next(e)
         }
@@ -154,7 +155,7 @@ router.post('/service/cancel',
             }
             const body: z.infer<typeof SCHEMA.SERVICE_CANCEL> = req.body;
             const booking = await bookingService.cancelService(body.booking_id, req.userID!!, req.isAdmin ?? false);
-            res.send(booking);
+            res.send(successResponse(booking));
         } catch(e) {
             next(e)
         }
@@ -173,7 +174,7 @@ router.post('/service/complete',
             }
             const body: z.infer<typeof SCHEMA.SERVICE_COMPLETE> = req.body;
             const booking = await bookingService.completeService(body.booking_id, req.userID!!, req.isAdmin ?? false);
-            res.send(booking);
+            res.send(successResponse(booking));
         } catch(e) {
             next(e)
         }
@@ -193,7 +194,7 @@ router.post('/service/reschedule',
             }
             const body: z.infer<typeof SCHEMA.SERVICE_RESCHEDULE> = req.body;
             const booking = await bookingService.rescheduleService(body.booking_id, body.time_slot_id, req.userID!!, body.date, req.isAdmin ?? false);
-            res.send(booking);
+            res.send(successResponse(booking));
         } catch(e) {
             next(e)
         }
@@ -208,7 +209,7 @@ router.get('/doctor',
                 next(ERRORS.AUTH_UNAUTHERISED);
             }
             const bookings = await bookingService.getAllDoctorBookingsForUser(req.userID!!);
-            res.send(bookings);
+            res.send(successResponse(bookings));
         } catch(e) {
             next(e)
         }
@@ -223,7 +224,7 @@ router.get('/service',
                 next(ERRORS.AUTH_UNAUTHERISED);
             }
             const bookings = await bookingService.getAllServiceBookingsForUser(req.userID!!);
-            res.send(bookings);
+            res.send(successResponse(bookings));
         } catch(e) {
             next(e)
         }
@@ -239,7 +240,7 @@ router.get('/doctor/:id',
                 next(ERRORS.INVALID_PARAMS);
             }
             const bookings = await bookingService.getAllDoctorBookingsForUser(userID);
-            res.send(bookings);
+            res.send(successResponse(bookings));
         } catch(e) {
             next(e)
         }
@@ -255,7 +256,7 @@ router.get('/service/:id',
                 next(ERRORS.INVALID_PARAMS);
             }
             const bookings = await bookingService.getAllServiceBookingsForUser(userID);
-            res.send(bookings);
+            res.send(successResponse(bookings));
         } catch(e) {
             next(e)
         }
