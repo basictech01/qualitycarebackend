@@ -339,6 +339,8 @@ export class UserService {
                 return {
                     id: user.id,
                     full_name: user.full_name,
+                    email_address: user.email_address,
+                    phone_number: user.phone_number,
                     points: qpointsMap.get(user.id) || 0,
                     redeemed: redeemedMap.get(user.id) || 0,
                     photo_url: user.photo_url,

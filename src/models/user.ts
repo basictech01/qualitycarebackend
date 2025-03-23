@@ -44,6 +44,8 @@ export interface AuthUser {
 export interface UserMetic {
     id: number;
     full_name: string;
+    email_address: string;
+    phone_number: string;
     points: number;
     redeemed: number;
     photo_url?: string;
