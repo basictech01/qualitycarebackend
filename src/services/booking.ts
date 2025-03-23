@@ -284,11 +284,17 @@ export default class BookingService {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
+            const user = await this.userRepository.getUserByIdOrNull(connection, user_id);
+            if (!user) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
             const booking = await this.bookingRepository.getAllDoctorBookingForUser(connection, user_id);
             return booking;
 
         } catch (e) {
-            logger.error(e);
+            if (e instanceof RequestError) {
+                throw e;
+            }
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {
@@ -301,10 +307,16 @@ export default class BookingService {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
+            const user = await this.userRepository.getUserByIdOrNull(connection, user_id);
+            if (!user) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
             const booking = await this.bookingRepository.getAllServiceBookingForUser(connection, user_id);
             return booking;
         } catch (e) {
-            logger.error(e);
+            if (e instanceof RequestError) {
+                throw e;
+            }
             throw ERRORS.INTERNAL_SERVER_ERROR;
         } finally {
             if (connection) {

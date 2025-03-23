@@ -68,6 +68,22 @@ export default class UserRepository {
         }
     }
 
+    async getUserByIdOrNull(connection: PoolConnection, id: number): Promise<User> {
+        try {
+            const [users,] = await connection.query<User[]>('SELECT * from user where id = ?', [id]);
+            if (users.length === 0) {
+                throw ERRORS.USER_NOT_FOUND;
+            }
+            return users[0];
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
     async getUserByEmail(connection: PoolConnection, email: string): Promise<User> {
         try {
             const [users,] = await connection.query<User[]>('SELECT * from user where email_address = ?', [email]);

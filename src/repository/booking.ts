@@ -250,7 +250,7 @@ export default class BookingRepository {
                                                             JOIN doctor d ON bd.doctor_id = d.id
                                                             JOIN doctor_branch db ON d.id = db.doctor_id
                                                             JOIN branch b ON db.branch_id = b.id
-                                                            JOIN doctor_time_slot dts ON dts.doctor_branch = db.id
+                                                            JOIN doctor_time_slot dts ON dts.doctor_id = bd.doctor_id
                                                             WHERE bd.time_slot_id = dts.id and user_id = ?`, [user_id]);
             return result
         } catch (e) {
