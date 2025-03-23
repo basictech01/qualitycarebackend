@@ -17,7 +17,8 @@ function createLogger(label: string): winston.Logger {
             winston.format.printf(info => `[${info.label}] ${info.timestamp} ${info.level}: ${info.message}`+(info.splat!==undefined?`${info.splat}`:" "))
         ),
         transports: [
-            new winston.transports.Console()
+            new winston.transports.Console(),
+            new winston.transports.File({ filename: 'error.log', level: 'debug' }),
         ]
     });
 }

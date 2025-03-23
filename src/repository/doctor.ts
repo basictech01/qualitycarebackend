@@ -238,6 +238,19 @@ export default class DoctorRepository {
         }
     }
 
+    async getActiveDoctorTimeSlotByIdOrNull(conn: PoolConnection, doctorTimeSlotId: number): Promise<DoctorTimeSlot> {
+        try {
+            const [rows] = await conn.query<DoctorTimeSlotRow[]>('SELECT * FROM doctor_time_slot WHERE id = ? and is_active = 1', [doctorTimeSlotId]);
+            if (rows.length === 0) {
+                throw ERRORS.DOCTOR_TIME_SLOT_NOT_FOUND;
+            }
+            return rows[0];
+        } catch (e) {
+            logger.error(e);
+            throw e;
+        }
+    }
+
     async getDoctorTimeSlot(conn: PoolConnection, doctor_id: number): Promise<DoctorTimeSlot[]> {
         try {
             const [rows] = await conn.query<DoctorTimeSlotRow[]>('SELECT * FROM doctor_time_slot WHERE doctor_id = ? AND is_active = 1', [doctor_id]);
@@ -296,6 +309,19 @@ export default class DoctorRepository {
             await conn.query('UPDATE doctor SET about_ar = ?, about_en = ?, attended_patient = ?, languages = ?, name_ar = ?, name_en = ?, photo_url = ?, qualification = ?, session_fees = ?, total_experience = ?, is_active = ? WHERE id = ?', [about_ar, about_en, attended_patient, languages, name_ar, name_en, photo_url, qualification, session_fees, total_experience, is_active, doctorId]);
             const doctor = await this.getDoctorById(conn, doctorId);
             return doctor;
+        } catch (e) {
+            logger.error(e);
+            throw e;
+        }
+    }
+
+    async getActiveDoctorBranchOrNull(conn: PoolConnection, doctorId: number, branchId: number): Promise<DoctorBranch | null> {
+        try {
+            const [rows] = await conn.query<DoctorBranchRow[]>('SELECT * FROM doctor_branch WHERE doctor_id = ? AND branch_id = ? AND is_active = 1', [doctorId, branchId]);
+            if (rows.length === 0) {
+                return null;
+            }
+            return rows[0];
         } catch (e) {
             logger.error(e);
             throw e;

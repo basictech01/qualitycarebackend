@@ -1,4 +1,4 @@
-import { BookingDoctor, BookingDoctorView, BookingServiceI, BookingServiceView } from "@models/booking";
+import { BookingDoctor, BookingDoctorDetails, BookingDoctorView, BookingServiceDetails, BookingServiceI, BookingServiceView } from "@models/booking";
 import { Doctor } from "@models/doctor";
 import BookingRepository from "@repository/booking";
 import BranchRepository from "@repository/branch";
@@ -31,7 +31,7 @@ export default class BookingService {
         this.qpointRepository = new QPointRepository();
     }
 
-    async bookDoctor(doctor_id: number, time_slot_id: number, user_id: number, date: string): Promise<BookingDoctor> {
+    async bookDoctor(doctor_id: number, time_slot_id: number, user_id: number, date: string, branch_id: number): Promise<BookingDoctor> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -45,11 +45,17 @@ export default class BookingService {
             if (!timeSlot) {
                 throw ERRORS.TIME_SLOT_NOT_FOUND_FOR_DOCTOR;
             }
-            const existingBooking = await this.bookingRepository.getDoctorBookingOrNull(connection, doctor_id, date, time_slot_id);
+            // check if the doctor branch exists or not
+            const doctor_branch = await this.doctorRepository.getActiveDoctorBranchOrNull(connection, branch_id, doctor_id);
+            if (!doctor_branch) {
+                throw ERRORS.DOCTOR_NOT_FOUND;
+            }
+    
+            const existingBooking = await this.bookingRepository.getDoctorBookingOrNull(connection, doctor_id, date, time_slot_id, branch_id);
             if (existingBooking) {
                 throw ERRORS.DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT;
             }
-            const booking = await this.bookingRepository.bookDoctor(connection, doctor_id, time_slot_id, user_id, date);
+            const booking = await this.bookingRepository.bookDoctor(connection, doctor_id, time_slot_id, user_id, date, branch_id);
             await connection.commit();
             return booking;
         } catch (e) {
@@ -142,11 +148,12 @@ export default class BookingService {
             if (!timeSlot) {
                 throw ERRORS.TIME_SLOT_NOT_FOUND_FOR_DOCTOR;
             }
-            const existingBooking = await this.bookingRepository.getDoctorBookingOrNull(connection, booking.doctor_id, date, time_slot_id);
+            const existingBooking = await this.bookingRepository.getDoctorBookingOrNull(connection, booking.doctor_id, date, time_slot_id, booking.branch_id);
             if (existingBooking) {
                 throw ERRORS.DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT;
             }
-            const newBooking = await this.bookingRepository.bookDoctor(connection, booking.doctor_id, time_slot_id, user_id, date);
+            const oldBooking = await this.bookingRepository.rescheduleDoctor(connection, booking_id);
+            const newBooking = await this.bookingRepository.bookDoctor(connection, booking.doctor_id, time_slot_id, user_id, date, booking.branch_id);
             await connection.commit();
             return newBooking;
         } catch (e) {
@@ -265,7 +272,8 @@ export default class BookingService {
             if (existingBooking) {
                 throw ERRORS.DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT;
             }
-            const newBooking = await this.bookingRepository.bookDoctor(connection, booking.service_id, time_slot_id, user_id, date);
+            const oldBooking = await this.bookingRepository.rescheduleService(connection, booking_id);
+            const newBooking = await this.bookingRepository.bookService(connection, booking.service_id, time_slot_id, user_id, date, booking.branch_id);
             await connection.commit();
             return newBooking;
         } catch (e) {
@@ -302,6 +310,45 @@ export default class BookingService {
             }
         }
     }
+
+    async getAllServiceBookingsMetric(): Promise<BookingServiceDetails[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const booking = await this.bookingRepository.getAllServiceBookingsMetrics(connection);
+            return booking;
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getAllDoctorBookingsMetric(): Promise<BookingDoctorDetails[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const booking = await this.bookingRepository.getAllDoctorBookingsMetrics(connection);
+            return booking;
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+
+
 
     async getAllServiceBookingsForUser(user_id: number): Promise<BookingServiceView[]> {
         let connection: PoolConnection | null = null;

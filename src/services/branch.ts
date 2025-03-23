@@ -1,5 +1,4 @@
 import { Branch } from "@models/branch";
-import { Service } from "@models/service";
 import BranchRepository from "@repository/branch";
 import pool from "@utils/db";
 import { ERRORS, RequestError } from "@utils/error";

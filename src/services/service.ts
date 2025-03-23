@@ -187,7 +187,7 @@ export default class SettingService {
         }
     }
 
-    async updateCategory(category_id: number, name_en: string | undefined, name_ar: string | undefined, image_ar: string | undefined, image_en: string | undefined, type: string | undefined): Promise<ServiceCategory> {
+    async updateCategory(category_id: number, name_ar: string | undefined, name_en: string | undefined, image_ar: string | undefined, image_en: string | undefined, type: string | undefined): Promise<ServiceCategory> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();

@@ -16,6 +16,7 @@ const SCHEMA = {
     DOCTOR: z.object({
         doctor_id: z.number(),
         time_slot_id: z.number(),
+        branch_id: z.number(),
         date: z.string().date()
     }),
     DOCTOR_CANCEL: z.object({
@@ -59,7 +60,7 @@ router.post('/doctor',
                 next(ERRORS.AUTH_UNAUTHERISED);
             }
             const body: z.infer<typeof SCHEMA.DOCTOR> = req.body;
-            const booking = await bookingService.bookDoctor(body.doctor_id, body.time_slot_id, req.userID!!, body.date);
+            const booking = await bookingService.bookDoctor(body.doctor_id, body.time_slot_id, req.userID!!, body.date, body.branch_id);
             res.send(successResponse(booking));
         } catch(e) {
             next(e)
@@ -224,6 +225,37 @@ router.get('/service',
                 next(ERRORS.AUTH_UNAUTHERISED);
             }
             const bookings = await bookingService.getAllServiceBookingsForUser(req.userID!!);
+            res.send(successResponse(bookings));
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.get('/service/metric',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            if(!req.userID) {
+                next(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const bookings = await bookingService.getAllServiceBookingsMetric();
+            res.send(successResponse(bookings));
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
+
+router.get('/doctor/metric',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            if(!req.userID) {
+                next(ERRORS.AUTH_UNAUTHERISED);
+            }
+            const bookings = await bookingService.getAllDoctorBookingsMetric();
             res.send(successResponse(bookings));
         } catch(e) {
             next(e)
