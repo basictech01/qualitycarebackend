@@ -54,7 +54,8 @@ CREATE TABLE doctor (
     languages TEXT,
     name_en VARCHAR(1024) NOT NULL,
     name_ar VARCHAR(1024) NOT NULL,
-    photo_url TEXT
+    photo_url TEXT,
+    is_active tinyint(1) NOT NULL DEFAULT '1'
 );
 
 CREATE TABLE doctor_branch (
@@ -62,6 +63,7 @@ CREATE TABLE doctor_branch (
     doctor_id INT NOT NULL,
     day INT NOT NULL,
     branch_id INT NOT NULL,
+    is_active tinyint(1) NOT NULL DEFAULT '1',
     UNIQUE KEY (doctor_id, branch_id)
 );
 
@@ -69,7 +71,8 @@ CREATE TABLE doctor_time_slot (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     doctor_id INT NOT NULL,
     start_time TIME NOT NULL,
-    end_time TIME NOT NULL
+    end_time TIME NOT NULL,
+    is_active tinyint(1) NOT NULL DEFAULT '1'
 );
 
 CREATE TABLE notification (

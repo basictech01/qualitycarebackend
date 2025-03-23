@@ -3,6 +3,8 @@
 //     message: string,
 // }
 
+import { INVALID } from "zod"
+
 export class RequestError {
     code: number
     message: string
@@ -72,6 +74,7 @@ export const ERRORS = {
     DOCTOR_NOT_ASSIGNED_TO_BRANCH: new RequestError("Doctor not assigned to branch", 30007, 400),
     SERVICE_ALREADY_ADDED_TO_BRANCH: new RequestError("Service already added to branch", 30008, 400),
     SERVICE_TIME_SLOT_NOT_FOUND: new RequestError("Service time slot not found", 30009, 404),
+    INVALID_DAY_MAPPING: new RequestError("Invalid day mapping", 30010, 400),
 
     BOOKING_NOT_FOUND: new RequestError("Booking not found", 50001, 404),
     DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT: new RequestError("Doctor already booked for this slot", 50002, 400),

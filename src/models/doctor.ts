@@ -12,7 +12,8 @@ CREATE TABLE doctor (
     languages TEXT,
     name_en VARCHAR(1024) NOT NULL,
     name_ar VARCHAR(1024) NOT NULL,
-    photo_url TEXT
+    photo_url TEXT,
+    is_active BOOLEAN DEFAULT TRUE
 );
 `
 
@@ -28,6 +29,7 @@ export interface Doctor  {
     name_en: string;
     name_ar: string;
     photo_url: string;
+    is_active: boolean;
 }
 
 export interface DoctorView extends Doctor {
@@ -39,8 +41,9 @@ export const DOCTOR_BRANCH = `
 CREATE TABLE doctor_branch(
     int PRIMARY KEY,
     doctor_id INT NOT NULL,
-    day INT NOT NULL,
+    day_hash INT NOT NULL,
     branch_id INT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (id),
     UNIQUE KEY (doctor_id, branch_id)
 );
@@ -59,6 +62,8 @@ CREATE TABLE doctor_time_slot (
     doctor_id INT NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE
+    UNIQUE KEY (doctor_id, start_time, end_time)
 );
 `
 
@@ -67,6 +72,7 @@ export interface DoctorTimeSlot  {
     doctor_id: number;
     start_time: string;
     end_time: string;
+    is_active: boolean;
 }
 
 export interface DoctorTimeSlotView  {

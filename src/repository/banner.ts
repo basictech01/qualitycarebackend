@@ -36,4 +36,13 @@ export default class BannerRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+    
+    async deleteBanner(connection: PoolConnection, id: number): Promise<void> {
+        try {
+            await connection.query('DELETE from banner where id = ?', [id]);
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }

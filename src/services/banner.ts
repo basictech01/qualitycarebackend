@@ -71,4 +71,23 @@ export default class BannerService {
         }
     }
 
+    async deleteBanner(id: number): Promise<void> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            await this.bannerRepository.deleteBanner(connection, id);
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
 }

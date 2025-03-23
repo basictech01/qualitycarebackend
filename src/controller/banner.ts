@@ -60,4 +60,18 @@ router.post('/',
     }
 )
 
+
+router.delete('/:id',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = parseInt(req.params.id);
+            await bannerService.deleteBanner(id);
+            res.send(successResponse({}));
+        } catch (e) {
+            next(e)
+        }
+    }
+)
+
 export default router;
