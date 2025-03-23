@@ -165,6 +165,24 @@ router.put('/branches',
     }
 )
 
+router.get('/branches',
+    verifyAdmin,
+    validateRequest({
+        query: z.object({
+            doctor_id: z.string()
+        })
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const doctor_id = parseInt(req.query.doctor_id as string);
+            const doctorBranch = await doctorService.getDoctorBranches(doctor_id);
+            res.json(successResponse(doctorBranch));
+        } catch (e) {
+            next(e);
+        }
+    }
+)
+
 //
 router.post('/time-slot',
     verifyAdmin,

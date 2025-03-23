@@ -88,6 +88,29 @@ export default class DoctorService {
         }
     }
 
+    async getDoctorBranches(doctor_id: number): Promise<DoctorBranch[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const doctor = await this.doctorRepository.getDoctorByIdOrNull(connection, doctor_id);
+            if (!doctor) {
+                throw ERRORS.DOCTOR_NOT_FOUND;
+            }
+            return await this.doctorRepository.getDoctorBranches(connection, doctor_id);
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
     async getDoctorForACity(city: string): Promise<Doctor[]> {
         let connection: PoolConnection | null = null;
         try {

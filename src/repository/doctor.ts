@@ -164,6 +164,16 @@ export default class DoctorRepository {
         }
     }
 
+    async getDoctorBranches(conn: PoolConnection, doctorId: number): Promise<DoctorBranch[]> {
+        try {
+            const [rows] = await conn.query<DoctorBranchRow[]>('SELECT * FROM doctor_branch WHERE doctor_id = ? and is_active =1', [doctorId]);
+            return rows;
+        } catch (e) {
+            logger.error(e);
+            throw e;
+        }
+    }
+
     async setActiveDoctorTimeSlot(conn: PoolConnection, doctorTimeSlotId: number, isActive: boolean): Promise<DoctorTimeSlot> {
         try {
             await conn.query('UPDATE doctor_time_slot SET is_active = ? WHERE id = ?', [isActive, doctorTimeSlotId]);
