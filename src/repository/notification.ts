@@ -28,5 +28,15 @@ export default class NotificationRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async getAllNotifications(connection: PoolConnection): Promise<Notification[]> {
+        try {
+            const [notification,] = await connection.query<Notification[]>('SELECT * from notification');
+            return notification
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }
 

@@ -21,7 +21,7 @@ export const verifyClient: RequestHandler = (req: Request, res: Response, next: 
     // @ts-ignore
     req.userID = decoded.id;
     // @ts-ignore
-    req.isAdmin = decode.is_admin;
+    req.isAdmin = decoded.is_admin;
     next();
   });
 };

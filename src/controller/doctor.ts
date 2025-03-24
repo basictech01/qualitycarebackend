@@ -49,7 +49,6 @@ const SCHEMA = {
         }))
     }),
     UPDATE_DOCTOR_TO_BRANCH: z.object({
-        doctor_id: z.number(),
         branches: z.array(z.object({
             day_map: z.string().min(7).max(7),
             branch_id: z.number()
@@ -68,7 +67,6 @@ const SCHEMA = {
         }))
     }),
     UPDATE_DOCTOR_TIME_SLOT: z.object({
-        doctor_id: z.number(),
         time_slots: z.array(z.object({
             start_time: z.string().time(),
             end_time: z.string().time()
@@ -149,15 +147,16 @@ router.post('/branches',
     }
 )
 
-router.put('/branches',
+router.put('/branches/:id',
     verifyAdmin,
     validateRequest({
-        body: SCHEMA.ADD_DOCTOR_TO_BRANCHES
+        body: SCHEMA.UPDATE_DOCTOR_TO_BRANCH
     }),
     async function(req: Request, res: Response, next: NextFunction) {
         try {
-            const body: z.infer<typeof SCHEMA.ADD_DOCTOR_TO_BRANCHES> = req.body
-            const doctorBranch = await doctorService.updateDoctorBranch(body.doctor_id, body.branches);
+            const body: z.infer<typeof SCHEMA.UPDATE_DOCTOR_TO_BRANCH> = req.body
+            const doctor_id = parseInt(req.params.id);
+            const doctorBranch = await doctorService.updateDoctorBranch(doctor_id, body.branches);
             res.json(successResponse(doctorBranch));
         } catch (e) {
             next(e);
@@ -216,15 +215,16 @@ router.post('/time-slots',
     }
 )
 
-router.put('/time-slots',
+router.put('/time-slots/:id',
     verifyAdmin,
     validateRequest({
-        body: SCHEMA.CREATE_DOCTOR_TIME_SLOTS
+        body: SCHEMA.UPDATE_DOCTOR_TIME_SLOT
     }),
     async function(req: Request, res: Response, next: NextFunction) {
         try {
-            const body: z.infer<typeof SCHEMA.CREATE_DOCTOR_TIME_SLOTS> = req.body
-            const timeSlots = await doctorService.updateDoctorTimeSlots(body.doctor_id, body.time_slots);
+            const body: z.infer<typeof SCHEMA.UPDATE_DOCTOR_TIME_SLOT> = req.body
+            const doctor_id = parseInt(req.params.id);
+            const timeSlots = await doctorService.updateDoctorTimeSlots(doctor_id, body.time_slots);
             res.json(successResponse(timeSlots));
         } catch (e) {
             next(e);
@@ -310,11 +310,11 @@ router.get('/:id',
 router.put('/:id',
     verifyAdmin,
     validateRequest({
-        body: SCHEMA.CREATE_DOCTOR
+        body: SCHEMA.UPDATE_DOCTOR
     }),
     async function(req: Request, res: Response, next: NextFunction) {
         try {
-            const body: z.infer<typeof SCHEMA.CREATE_DOCTOR> = req.body
+            const body: z.infer<typeof SCHEMA.UPDATE_DOCTOR> = req.body
             const doctor_id = parseInt(req.params.id);
             const doctor = await doctorService.updateDoctor(doctor_id, body.about_ar, body.about_en, body.attended_patient, body.languages, body.name_ar, body.name_en, body.photo_url, body.qualification, body.session_fees, body.total_experience, body.is_active);
             res.json(successResponse(doctor));

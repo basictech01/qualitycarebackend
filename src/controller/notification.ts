@@ -32,6 +32,18 @@ router.get('/',
     }
 )
 
+router.get('/all',
+    verifyClient,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const notifications = await notificationService.getAllNotifications();
+            res.send(successResponse(notifications));
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
 router.post('/', 
     verifyAdmin,
     validateRequest({
