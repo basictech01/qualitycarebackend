@@ -369,6 +369,7 @@ export default class BookingRepository {
                         d.name_en AS doctor_name_en,
                         d.name_ar AS doctor_name_ar,
                         d.photo_url AS doctor_photo_url,
+                        d.session_fees AS doctor_session_fees,
                         bd.time_slot_id AS time_slot_id,
                         dts.start_time AS time_slot_start_time,
                         dts.end_time AS time_slot_end_time,

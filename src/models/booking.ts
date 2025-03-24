@@ -117,6 +117,7 @@ export interface BookingDoctorDetails {
     doctor_id: number;
     doctor_name_en: string;
     doctor_name_ar: string;
+    doctor_session_fees: string;
     doctor_photo_url: string | null; // photo_url can be null
     time_slot_id: number;
     time_slot_start_time: string; // Representing TIME as string
