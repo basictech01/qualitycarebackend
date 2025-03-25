@@ -49,7 +49,8 @@ export default class BookingService {
                 throw ERRORS.TIME_SLOT_NOT_FOUND_FOR_DOCTOR;
             }
             // check if the doctor branch exists or not
-            const doctor_branch = await this.doctorRepository.getActiveDoctorBranchOrNull(connection, branch_id, doctor_id);
+            const doctor_branch = await this.doctorRepository.getActiveDoctorBranchOrNull(connection, doctor_id, branch_id);
+            console.log(doctor_branch);
             if (!doctor_branch) {
                 throw ERRORS.DOCTOR_NOT_FOUND;
             }
