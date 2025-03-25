@@ -6,6 +6,7 @@ import DoctorRepository from "@repository/doctor";
 import QPointRepository from "@repository/qpoint";
 import ServiceRepository from "@repository/service";
 import UserRepository from "@repository/user";
+import VatRepository from "@repository/vat";
 import pool from "@utils/db";
 import { ERRORS, RequestError } from "@utils/error";
 import createLogger from "@utils/logger";
@@ -20,7 +21,8 @@ export default class BookingService {
     serviceRepository: ServiceRepository;
     doctorRepository: DoctorRepository;
     branchRepository: BranchRepository;
-    qpointRepository: QPointRepository
+    qpointRepository: QPointRepository;
+    vatRepository: VatRepository
 
     constructor() {
         this.bookingRepository = new BookingRepository();
@@ -29,6 +31,7 @@ export default class BookingService {
         this.doctorRepository = new DoctorRepository();
         this.branchRepository = new BranchRepository();
         this.qpointRepository = new QPointRepository();
+        this.vatRepository = new VatRepository();
     }
 
     async bookDoctor(doctor_id: number, time_slot_id: number, user_id: number, date: string, branch_id: number): Promise<BookingDoctor> {
@@ -55,7 +58,8 @@ export default class BookingService {
             if (existingBooking) {
                 throw ERRORS.DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT;
             }
-            const booking = await this.bookingRepository.bookDoctor(connection, doctor_id, time_slot_id, user_id, date, branch_id);
+            const vat = await this.vatRepository.getVat(connection);
+            const booking = await this.bookingRepository.bookDoctor(connection, doctor_id, time_slot_id, user_id, date, branch_id, vat);
             await connection.commit();
             return booking;
         } catch (e) {
@@ -153,7 +157,7 @@ export default class BookingService {
                 throw ERRORS.DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT;
             }
             const oldBooking = await this.bookingRepository.rescheduleDoctor(connection, booking_id);
-            const newBooking = await this.bookingRepository.bookDoctor(connection, booking.doctor_id, time_slot_id, user_id, date, booking.branch_id);
+            const newBooking = await this.bookingRepository.bookDoctor(connection, booking.doctor_id, time_slot_id, user_id, date, booking.branch_id, booking.vat_percentage);
             await connection.commit();
             return newBooking;
         } catch (e) {
@@ -179,7 +183,8 @@ export default class BookingService {
             if (existingBooking.length >= maximumBooking.maximum_booking_per_slot) {
                 throw ERRORS.ALL_SLOTS_ALREADY_BOOKED_FOR_THIS_SERVICE;
             }
-            const booking = await this.bookingRepository.bookService(connection, service_id, time_slot_id, user_id, date, branch_id);
+            const vat = await this.vatRepository.getVat(connection);
+            const booking = await this.bookingRepository.bookService(connection, service_id, time_slot_id, user_id, date, branch_id, vat);
             await connection.commit();
             return booking;
         } catch (e) {
@@ -273,7 +278,7 @@ export default class BookingService {
                 throw ERRORS.DOCTOR_ALREADY_BOOKED_FOR_THIS_SLOT;
             }
             const oldBooking = await this.bookingRepository.rescheduleService(connection, booking_id);
-            const newBooking = await this.bookingRepository.bookService(connection, booking.service_id, time_slot_id, user_id, date, booking.branch_id);
+            const newBooking = await this.bookingRepository.bookService(connection, booking.service_id, time_slot_id, user_id, date, booking.branch_id, booking.vat_percentage);
             await connection.commit();
             return newBooking;
         } catch (e) {

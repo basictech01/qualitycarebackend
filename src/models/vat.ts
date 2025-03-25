@@ -11,5 +11,5 @@ CREATE TABLE vat (
 
 export interface Vat extends RowDataPacket {
     id: number;
-    vat_percentage: number;
+    vat_percentage: string;
 }

@@ -17,7 +17,7 @@ export default class VatRepository {
         }
     }
 
-    async getVat(connection: PoolConnection): Promise<number> {
+    async getVat(connection: PoolConnection): Promise<string> {
         try {
             const [vats,] = await connection.query<Vat[]>('SELECT * from vat limit 1');
             return vats[0].vat_percentage

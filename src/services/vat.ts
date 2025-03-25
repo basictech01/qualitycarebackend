@@ -34,7 +34,7 @@ export default class VatService {
         }
     }
 
-    async getVat(): Promise<number> {
+    async getVat(): Promise<string> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();

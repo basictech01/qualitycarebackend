@@ -5,6 +5,7 @@ CREATE TABLE booking_service (
     service_id INT,
     time_slot_id INT,
     date DATE NOT NULL,
+    vat_percentage DECIMAL(10,2) NOT NULL DEFAULT 10.00,
     status ENUM('SCHEDULED', 'RESCHEDULE' 'CANCELED', 'REFUND_INITIATED', 'REFUND_COMPLETED', 'COMPLETED') NOT NULL DEFAULT 'SCHEDULED'
 );
 
@@ -30,6 +31,7 @@ CREATE TABLE booking_doctor (
     doctor_id INT NOT NULL,
     branch_id INT NOT NULL,
     time_slot_id INT NOT NULL,
+    vat_percentage DECIMAL(10,2) NOT NULL DEFAULT 10.00,
     date DATE NOT NULL
 );
 
@@ -49,6 +51,7 @@ CREATE TABLE doctor (
     session_fees INT NOT NULL,
     attended_patient INT DEFAULT 0,
     total_experience INT NOT NULL,
+    rating DECIMAL(3,2) DEFAULT 4.50,
     about_en TEXT,
     about_ar TEXT,
     qualification TEXT,

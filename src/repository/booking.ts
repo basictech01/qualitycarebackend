@@ -25,9 +25,9 @@ interface BookingDoctorDetailsRow extends RowDataPacket, BookingDoctorDetails {}
 interface VisitsPerUserRow extends RowDataPacket, TotalVisitsPerUser {}
 export default class BookingRepository {
 
-    async bookDoctor(connection: PoolConnection, doctor_id: number, time_slot_id: number, user_id: number, date: string, branch_id: number): Promise<BookingDoctor> {
+    async bookDoctor(connection: PoolConnection, doctor_id: number, time_slot_id: number, user_id: number, date: string, branch_id: number, vat: string): Promise<BookingDoctor> {
         try {
-            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO booking_doctor (doctor_id, time_slot_id, user_id, date, branch_id) VALUES (?, ?, ?, ?)', [doctor_id, time_slot_id, user_id, date, branch_id]);
+            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO booking_doctor (doctor_id, time_slot_id, user_id, date, branch_id, vat) VALUES (?, ?, ?, ?, ?, ?)', [doctor_id, time_slot_id, user_id, date, branch_id, vat]);
             const booking_id = result.insertId;
             return await this.getBookingDoctor(connection, booking_id);
         } catch (e) {
@@ -135,9 +135,9 @@ export default class BookingRepository {
         }
     }
 
-    async bookService(connection: PoolConnection, service_id: number, time_slot_id: number, user_id: number, date: string, branch_id: number): Promise<BookingServiceIRow> {
+    async bookService(connection: PoolConnection, service_id: number, time_slot_id: number, user_id: number, date: string, branch_id: number, vat: string): Promise<BookingServiceIRow> {
         try {
-            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO booking_service (service_id, time_slot_id, user_id, date, branch_id) VALUES (?, ?, ?, ?, ?)', [service_id, time_slot_id, user_id, date, branch_id]);
+            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO booking_service (service_id, time_slot_id, user_id, date, branch_id, vat) VALUES (?, ?, ?, ?, ?, ?)', [service_id, time_slot_id, user_id, date, branch_id, vat]);
             const booking_id = result.insertId;
             return await this.getBookingService(connection, booking_id);
         } catch (e) {
@@ -262,6 +262,7 @@ export default class BookingRepository {
                                                                 bd.id,
                                                                 bd.user_id,
                                                                 bd.status,
+                                                                bd.vat_percentage,
                                                                 dts.start_time,
                                                                 dts.end_time,
                                                                 b.name_en AS branch_name_en,
@@ -289,6 +290,7 @@ export default class BookingRepository {
                     bs.id,
                     bs.user_id,
                     bs.status,
+                    bs.vat_percentage,
                     b.name_en AS branch_name_en,
                     b.name_ar AS branch_name_ar,
                     sts.start_time,
@@ -325,6 +327,7 @@ export default class BookingRepository {
                     b.name_ar AS branch_name_ar,
                     bs.service_id AS service_id,
                     s.actual_price AS service_actual_price,
+                    bs.vat_percentage AS vat_percentage,
                     s.discounted_price AS service_discounted_price,
                     s.name_en AS service_name_en,
                     s.name_ar AS service_name_ar,
@@ -368,6 +371,7 @@ export default class BookingRepository {
                         bd.doctor_id AS doctor_id,
                         d.name_en AS doctor_name_en,
                         d.name_ar AS doctor_name_ar,
+                        bd.vat_percentage AS vat_percentage,
                         d.photo_url AS doctor_photo_url,
                         d.session_fees AS doctor_session_fees,
                         bd.time_slot_id AS time_slot_id,

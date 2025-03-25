@@ -5,11 +5,12 @@ import { RowDataPacket } from "mysql2/promise";
 const DEFINATION_BOOKING_SERVICE = `
 CREATE TABLE booking_service (
     id INT PRIMARY KEY,
-    user_id INT -> user_id, full_name, email_address
-    branch_id INT -> branch_id, name_en, name_ar
-    service_id INT, -> service_id, actual_price, discounted_price, name_en, name_ar, category_id, category_tye category_name_en, category_name_ar
-    time_slot_id INT -> time_slot_id, start_time, end_time
+    user_id INT, 
+    branch_id INT, 
+    service_id INT,
+    time_slot_id INT,
     date varchar(255),
+    vat_percentage DECIMAL(10,2) NOT NULL DEFAULT 10.00,
     status ENUM('SCHEDULED', 'CANCELED', 'REFUND_INITIATED', 'REFUND_COMPLETED', 'COMPLETED') NOT NULL DEFAULT 'SCHEDULED',
 );
 `
@@ -22,16 +23,18 @@ export interface BookingServiceI {
     time_slot_id: number;
     date: string;
     branch_id: number;
+    vat_percentage: string;
 }
 
 const DEFINATION_BOOKING = `
 CREATE TABLE booking_doctor (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL -> user_id, full_name, email_address
+    user_id INT NOT NULL,
     status ENUM('SCHEDULED', 'CANCELED', 'REFUND_INITIATED', 'REFUND_COMPLETED', 'COMPLETED') NOT NULL DEFAULT 'SCHEDULED',
-    doctor_id INT NOT NULL -> doctor_id, name_en, name_ar, photo_url
-    time_slot_id INT NOT NULL -> time_slot_id, start_time, end_time
-    branch_id INT NOT NULL -> branch_id, name_en, name_ar
+    doctor_id INT NOT NULL,
+    time_slot_id INT NOT NULL,
+    branch_id INT NOT NULL,
+    vat_percentage DECIMAL(10,2) NOT NULL DEFAULT 10.00,
     date varchar(255)
 );
 `
@@ -44,6 +47,7 @@ export interface BookingDoctor {
     branch_id: number;
     time_slot_id: number;
     date: string;
+    vat_percentage: string;
 }
 
 export interface BookingDoctorView {
@@ -58,6 +62,7 @@ export interface BookingDoctorView {
     name_en: string;
     photo_url: string;
     date: string;
+    vat_percentage: string;
 }
 
 export interface BookingServiceView {
@@ -75,6 +80,7 @@ export interface BookingServiceView {
     service_image_en_url: string;
     service_image_ar_url: string;
     date: string;
+    vat_percentage: string;
 }
 
 export interface TotalVisitsPerUser {
@@ -89,6 +95,7 @@ export interface BookingServiceDetails {
     user_full_name: string;
     user_email: string;
     branch_id: number;
+    vat_percentage: string;
     branch_name_en: string;
     branch_name_ar: string;
     service_id: number;
@@ -114,6 +121,7 @@ export interface BookingDoctorDetails {
     user_full_name: string;
     user_email: string;
     booking_status: 'SCHEDULED' | 'RESCHEDULE' | 'CANCELED' | 'REFUND_INITIATED' | 'REFUND_COMPLETED' | 'COMPLETED';
+    vat_percentage: string;
     doctor_id: number;
     doctor_name_en: string;
     doctor_name_ar: string;
