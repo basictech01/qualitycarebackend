@@ -164,7 +164,7 @@ router.put('/branches/:id',
 )
 
 router.get('/branches',
-    verifyAdmin,
+    verifyClient,
     validateRequest({
         query: z.object({
             doctor_id: z.string()
