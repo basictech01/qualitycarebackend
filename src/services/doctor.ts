@@ -1,3 +1,4 @@
+import { Branch } from "@models/branch";
 import { Doctor, DoctorBranch, DoctorTimeSlot, DoctorTimeSlotAvailable, DoctorTimeSlotView } from "@models/doctor";
 import BookingRepository from "@repository/booking";
 import BranchRepository from "@repository/branch";
@@ -61,6 +62,26 @@ export default class DoctorService {
             } else {
                 logger.error(e);
                 throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getDoctorBranchInfo(doctor_id: number): Promise<Branch[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            return await this.doctorRepository.getDoctorBranchInfo(connection, doctor_id);
+        }
+        catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR
             }
         } finally {
             if (connection) {

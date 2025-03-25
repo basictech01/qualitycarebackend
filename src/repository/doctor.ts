@@ -1,3 +1,4 @@
+import { Branch, BranchRow } from "@models/branch";
 import { Doctor, DoctorBranch, DoctorTimeSlot } from "@models/doctor";
 import { ERRORS } from "@utils/error";
 import createLogger from "@utils/logger";
@@ -20,6 +21,17 @@ export default class DoctorRepository {
             throw e;
         }
     }
+
+    async getDoctorBranchInfo(conn: PoolConnection, doctorId: number): Promise<Branch[]> {
+        try {
+            const [rows] = await conn.query<BranchRow[]>('SELECT b.* FROM doctor_branch JOIN branch as b where doctor_branch.branch_id = b.id and doctor_id = ?', [doctorId]);
+            return rows;
+        } catch (e) {
+            logger.error(e);
+            throw e;
+        }
+    }
+
 
     async setAllDoctorBranchInactive(conn: PoolConnection, doctorId: number): Promise<void> {
         try {

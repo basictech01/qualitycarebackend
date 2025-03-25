@@ -22,3 +22,5 @@ export interface Branch  {
     latitude: number;
     longitude: number;
 }
+
+export interface BranchRow extends RowDataPacket, Branch {}

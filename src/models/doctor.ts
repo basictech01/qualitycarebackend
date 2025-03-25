@@ -7,6 +7,7 @@ CREATE TABLE doctor (
     attended_patient INT DEFAULT 0,
     total_experience INT NOT NULL,
     rating DECIMAL(3,2) DEFAULT 4.50,
+    total_rating INT DEFAULT 0,
     about_en TEXT,
     about_ar TEXT,
     qualification TEXT,
@@ -24,6 +25,7 @@ export interface Doctor  {
     attended_patient: number;
     total_experience: number;
     rating: string;
+    total_rating: number;
     about_en: string;
     about_ar: string;
     qualification: string;
