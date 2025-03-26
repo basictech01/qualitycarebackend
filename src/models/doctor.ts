@@ -57,7 +57,7 @@ export interface DoctorBranch  {
     id: number;
     doctor_id: number;
     day: number;
-    day_hash: string;
+    day_map: string;
     branch_id: number;
 }
 

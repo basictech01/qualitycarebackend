@@ -427,6 +427,7 @@ export default class DoctorService {
         try {
             connection = await pool.getConnection();
             const doctorBranch = await this.doctorRepository.getDoctorBranch(connection, doctor_id, branch_id);
+            console.log(doctorBranch)
             const doctor_time_slot = await this.doctorRepository.getDoctorTimeSlot(connection, doctor_id);
             const booking = await this.bookingRepository.getDoctorBooking(connection, doctor_id, date);
             const booking_time_slot = booking.map(b => b.time_slot_id);
@@ -434,7 +435,7 @@ export default class DoctorService {
             logger.error(booking)
             return doctor_time_slot.map(d => {
                 return {
-                    available: doctorBranch.day_hash[day] === '1' && !booking_time_slot.includes(d.id),
+                    available: doctorBranch.day_map[day] === '1' && !booking_time_slot.includes(d.id),
                     id: d.id,
                     doctor_id: doctor_id,
                     branch_id: branch_id,
