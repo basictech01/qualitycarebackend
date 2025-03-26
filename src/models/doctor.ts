@@ -45,7 +45,7 @@ export const DOCTOR_BRANCH = `
 CREATE TABLE doctor_branch(
     int PRIMARY KEY,
     doctor_id INT NOT NULL,
-    day_hash INT NOT NULL,
+    day_hash ,
     branch_id INT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (id),
@@ -57,6 +57,7 @@ export interface DoctorBranch  {
     id: number;
     doctor_id: number;
     day: number;
+    day_hash: string;
     branch_id: number;
 }
 
@@ -80,12 +81,14 @@ export interface DoctorTimeSlot  {
 }
 
 export interface DoctorTimeSlotView  {
+    id: number;
     doctor_id: number;
     start_time: string;
     end_time: string;
 }
 
 export interface DoctorTimeSlotAvailable {
+    id: number;
     available: boolean;
     doctor_id: number;
     branch_id: number;

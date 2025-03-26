@@ -290,12 +290,8 @@ export default class DoctorService {
             if (!doctor) {
                 throw ERRORS.DOCTOR_NOT_FOUND;
             }
-            await this.doctorRepository.createDoctorTimeSlot(connection, doctor_id, start_time, end_time);
-            return {
-                doctor_id: doctor_id,
-                start_time: start_time,
-                end_time: end_time
-            }
+            const newTimeSlot = await this.doctorRepository.createDoctorTimeSlot(connection, doctor_id, start_time, end_time);
+            return newTimeSlot
         } catch (e) {
             if (e instanceof RequestError) {
                 throw e;
@@ -320,12 +316,8 @@ export default class DoctorService {
             }
             const result: DoctorTimeSlotView[] = [];
             for(const time_slot of time_slots) {
-                await this.doctorRepository.createDoctorTimeSlot(connection, doctor_id, time_slot.start_time, time_slot.end_time);
-                result.push({
-                    doctor_id: doctor_id,
-                    start_time: time_slot.start_time,
-                    end_time: time_slot.end_time
-                });
+                const newTimeSlot = await this.doctorRepository.createDoctorTimeSlot(connection, doctor_id, time_slot.start_time, time_slot.end_time);
+                result.push(newTimeSlot);
             }
             return result;
         } catch (e) {
@@ -353,8 +345,9 @@ export default class DoctorService {
             const result: DoctorTimeSlotView[] = [];
             await this.doctorRepository.setAllDoctorTimeSlotInactive(connection, doctor_id);
             for(const time_slot of time_slots) {
-                await this.doctorRepository.createDoctorTimeSlot(connection, doctor_id, time_slot.start_time, time_slot.end_time);
+                const newTimeSlot = await this.doctorRepository.createDoctorTimeSlot(connection, doctor_id, time_slot.start_time, time_slot.end_time);
                 result.push({
+                    id: newTimeSlot.id,
                     doctor_id: doctor_id,
                     start_time: time_slot.start_time,
                     end_time: time_slot.end_time
@@ -384,6 +377,7 @@ export default class DoctorService {
             const doctor_time_slot = await this.doctorRepository.getDoctorTimeSlot(connection, doctor_id);
             return doctor_time_slot.map(d => {
                 return {
+                    id: d.id,
                     doctor_id: doctor_id,
                     start_time: d.start_time,
                     end_time: d.end_time
@@ -428,7 +422,7 @@ export default class DoctorService {
     }
 
 
-    async getAvailableTimeSlots(doctor_id: number, branch_id: number, day: number, date: string): Promise<DoctorTimeSlotAvailable[]> {
+    async getAvailableTimeSlots(doctor_id: number, branch_id: number, date: string): Promise<DoctorTimeSlotAvailable[]> {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
@@ -436,10 +430,12 @@ export default class DoctorService {
             const doctor_time_slot = await this.doctorRepository.getDoctorTimeSlot(connection, doctor_id);
             const booking = await this.bookingRepository.getDoctorBooking(connection, doctor_id, date);
             const booking_time_slot = booking.map(b => b.time_slot_id);
+            const day = new Date(date).getDay();
             logger.error(booking)
             return doctor_time_slot.map(d => {
                 return {
-                    available: !booking_time_slot.includes(d.id),
+                    available: doctorBranch.day_hash[day] === '1' && !booking_time_slot.includes(d.id),
+                    id: d.id,
                     doctor_id: doctor_id,
                     branch_id: branch_id,
                     start_time: d.start_time,
