@@ -518,7 +518,7 @@ export default class DoctorService {
             if (total_experience) {
                 doctor.total_experience = total_experience;
             }
-            if (is_active) {
+            if (is_active != undefined) {
                 doctor.is_active = is_active;
             }
             return await this.doctorRepository.updateDoctor(connection, doctor_id, doctor.about_ar, doctor.about_en, doctor.attended_patient, doctor.languages, doctor.name_ar, doctor.name_en, doctor.photo_url, doctor.qualification, doctor.session_fees, doctor.total_experience, doctor.is_active);
