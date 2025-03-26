@@ -292,8 +292,7 @@ router.get('/time-slot/available',
             const doctor_id = parseInt(req.query.doctor_id as string);
             const branch_id = parseInt(req.query.branch_id as string);
             const date = req.query.date as string;
-            const day = new Date(date).getDay();
-            const timeSlots = await doctorService.getAvailableTimeSlots(doctor_id, branch_id, day, date);
+            const timeSlots = await doctorService.getAvailableTimeSlots(doctor_id, branch_id, date);
             res.json(successResponse(timeSlots));
         } catch (e) {
             next(e);
