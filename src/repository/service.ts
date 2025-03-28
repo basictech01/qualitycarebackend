@@ -405,4 +405,18 @@ export default class ServiceRepository {
             throw ERRORS.DATABASE_ERROR;
         }
     }
+
+    async getFeaturedServices(connection: PoolConnection): Promise<Service[]> {
+        try {
+            const [services,] = await connection.query<ServiceRow[]>('SELECT * from service limit 5');
+            return services;
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
 }

@@ -305,6 +305,16 @@ router.post('/branch',
     }
 )
 
+router.get('/featured',
+    async function (req: Request, res: Response, next: NextFunction) {
+        try {
+            const doctors = await serviceService.getFeaturedServices();
+            res.json(successResponse(doctors));
+        } catch (e) {
+            next(e)
+    }
+})
+
 router.post('/branches',
     verifyAdmin,
     validateRequest({

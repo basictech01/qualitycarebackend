@@ -551,4 +551,23 @@ export default class SettingService {
             }
         }
     }
+
+    async getFeaturedServices(): Promise<Service[]> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            return await this.serviceRepository.getFeaturedServices(connection);
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
 }
