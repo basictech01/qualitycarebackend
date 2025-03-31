@@ -264,7 +264,7 @@ router.get('/doctor/metric',
 )
 
 router.get('/doctor/:id',
-    verifyAdmin,
+    verifyClient,
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const userID = parseInt(req.params.id);
@@ -280,7 +280,7 @@ router.get('/doctor/:id',
 )
 
 router.get('/service/:id',
-    verifyAdmin,
+    verifyClient,
     async function(req: Request, res: Response, next: NextFunction) {
         try {
             const userID = parseInt(req.params.id);
