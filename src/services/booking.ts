@@ -377,4 +377,46 @@ export default class BookingService {
             }
         }
     }
+
+    async getDoctorBookingDetails(bookingId: number): Promise<BookingDoctorDetails> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const booking = await this.bookingRepository.getDoctorBookingDetailOrNull(connection, bookingId);
+            if (!booking) {
+                throw ERRORS.BOOKING_NOT_FOUND;
+            }
+            return booking;
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
+    async getServiceBookingDetails(bookingId: number): Promise<BookingServiceDetails> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const booking = await this.bookingRepository.getServiceBookingDetailOrNull(connection, bookingId);
+            if (!booking) {
+                throw ERRORS.BOOKING_NOT_FOUND;
+            }
+            return booking;
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            }
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
 }

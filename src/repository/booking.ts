@@ -420,6 +420,96 @@ export default class BookingRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async getDoctorBookingDetailOrNull(connection: PoolConnection, booking_id: number): Promise<BookingDoctorDetails | null> {
+        try {
+            const [result,] = await connection.query<BookingDoctorDetailsRow[]>(`SELECT
+                bd.id AS id,
+                bd.user_id AS user_id,
+                u.full_name AS user_full_name,
+                u.email_address AS user_email,
+                bd.status AS booking_status,
+                bd.doctor_id AS doctor_id,
+                d.name_en AS doctor_name_en,
+                d.name_ar AS doctor_name_ar,
+                bd.vat_percentage AS vat_percentage,
+                d.photo_url AS doctor_photo_url,
+                d.session_fees AS doctor_session_fees,
+                bd.time_slot_id AS time_slot_id,
+                dts.start_time AS time_slot_start_time,
+                dts.end_time AS time_slot_end_time,
+                bd.branch_id AS branch_id,
+                b.name_en AS branch_name_en,
+                b.name_ar AS branch_name_ar,
+                bd.date AS booking_date
+            FROM
+                booking_doctor bd
+            LEFT JOIN
+                user u ON bd.user_id = u.id
+            LEFT JOIN
+                doctor d ON bd.doctor_id = d.id
+            LEFT JOIN
+                branch b ON bd.branch_id = b.id
+            LEFT JOIN
+                doctor_time_slot dts ON bd.time_slot_id = dts.id WHERE bd.id = ?`, [booking_id]);
+            if (result.length === 0) {
+                return null;
+            }
+            return result[0];
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+    async getServiceBookingDetailOrNull(connection: PoolConnection, booking_id: number): Promise<BookingServiceDetails | null> {
+        try {
+            const [result,] = await connection.query<BookingServiceDetailsRow[]>(`SELECT
+                bs.id AS id,
+                bs.user_id AS user_id,
+                u.full_name AS user_full_name,
+                u.email_address AS user_email,
+                bs.branch_id AS branch_id,
+                b.name_en AS branch_name_en,
+                b.name_ar AS branch_name_ar,
+                bs.service_id AS service_id,
+                s.actual_price AS service_actual_price,
+                bs.vat_percentage AS vat_percentage,
+                s.discounted_price AS service_discounted_price,
+                s.name_en AS service_name_en,
+                s.name_ar AS service_name_ar,
+                s.category_id AS service_category_id,
+                sc.type AS service_category_type,
+                sc.name_en AS service_category_name_en,
+                sc.name_ar AS service_category_name_ar,
+                bs.time_slot_id AS time_slot_id,
+                ts.start_time AS time_slot_start_time,
+                ts.end_time AS time_slot_end_time,
+                bs.date AS booking_date,
+                bs.status AS booking_status
+            FROM
+                booking_service bs
+            LEFT JOIN
+                user u ON bs.user_id = u.id
+            LEFT JOIN
+                branch b ON bs.branch_id = b.id
+            LEFT JOIN
+                service s ON bs.service_id = s.id
+            LEFT JOIN
+                service_category sc ON s.category_id = sc.id
+            LEFT JOIN
+                service_time_slot ts ON bs.time_slot_id = ts.id WHERE bs.id = ?`, [booking_id]);
+            if (result.length === 0) {
+                return null;
+            }
+            return result[0];
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
+
+
 }
 
 interface TotalSpend extends RowDataPacket {

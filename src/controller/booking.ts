@@ -295,4 +295,39 @@ router.get('/service/:id',
     }
 )
 
+
+router.get('/:id/doctor',
+    verifyClient,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const bookingID = parseInt(req.params.id);
+            if(isNaN(bookingID)) {
+                next(ERRORS.INVALID_PARAMS);
+            }
+            const bookings = await bookingService.getDoctorBookingDetails(bookingID);
+            res.send(successResponse(bookings));
+        }
+        catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.get('/:id/service',
+    verifyClient,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const bookingID = parseInt(req.params.id);
+            if(isNaN(bookingID)) {
+                next(ERRORS.INVALID_PARAMS);
+            }
+            const bookings = await bookingService.getServiceBookingDetails(bookingID);
+            res.send(successResponse(bookings));
+        }
+        catch(e) {
+            next(e)
+        }
+    }
+)
+
 export default router;
