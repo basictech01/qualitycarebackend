@@ -178,7 +178,7 @@ export default class DoctorRepository {
 
     async getDoctorBranches(conn: PoolConnection, doctorId: number): Promise<DoctorBranch[]> {
         try {
-            const [rows] = await conn.query<DoctorBranchRow[]>('SELECT * FROM doctor_branch WHERE doctor_id = ? and is_active =1', [doctorId]);
+            const [rows] = await conn.query<DoctorBranchRow[]>('SELECT doctor_branch.*, name_ar, name_en FROM doctor_branch JOIN branch on branch.id = doctor_branch.branch_id  WHERE doctor_id = ? and is_active =1', [doctorId]);
             return rows;
         } catch (e) {
             logger.error(e);

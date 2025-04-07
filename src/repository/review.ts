@@ -43,12 +43,13 @@ export default class ReviewRepository {
         }
     }
 
-    async checkIfReviewExistsForBooking(connection: PoolConnection, bookingID: number, type: string): Promise<void> {
+    async checkIfReviewExistsForBooking(connection: PoolConnection, bookingID: number, type: string): Promise<boolean> {
         try {
             const [reviews,] = await connection.query<Review[]>('SELECT * from review where booking_id  = ? and booking_type = ?', [bookingID, type]);
             if (reviews.length === 0) {
-                throw ERRORS.REVIEW_NOT_FOUND;
+                return false;
             }
+            return true;
         } catch (e) {
             if (e instanceof RequestError) {
                 throw e;

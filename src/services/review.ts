@@ -57,11 +57,21 @@ export default class ReviewService {
         let connection: PoolConnection | null = null;
         try {
             connection = await pool.getConnection();
-            let booking = await this.bookingRepository.getBookingService(connection, bookingID);
-            if (!booking) {
-                throw ERRORS.BOOKING_NOT_FOUND;
+            if (type == 'DOCTOR') {
+                let booking = await this.bookingRepository.getBookingDoctor(connection, bookingID);
+                if (!booking) {
+                    throw ERRORS.BOOKING_NOT_FOUND;
+                }
+            } else if (type == 'SERVICE') {
+                let booking = await this.bookingRepository.getBookingService(connection, bookingID);
+                if (!booking) {
+                    throw ERRORS.BOOKING_NOT_FOUND;
+                }
             }
-            await this.reviewRepository.checkIfReviewExistsForBooking(connection, bookingID, type);
+            const reviewExists = await this.reviewRepository.checkIfReviewExistsForBooking(connection, bookingID, type);
+            if (reviewExists) {
+                throw ERRORS.REVIEW_ALREADY_EXISTS;
+            }
             return await this.reviewRepository.createReview(connection, userID, bookingID, rating, review, type);
         } catch (e) {
             if (e instanceof RequestError) {
