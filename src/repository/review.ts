@@ -96,7 +96,7 @@ export default class ReviewRepository {
 
     async getAllReviewsForDoctor(connection: PoolConnection, doctorID: number): Promise<Review[]> {
         try {
-            const [reviews,] = await connection.query<Review[]>('SELECT * from review where booking_id in (SELECT id from booking_doctor where doctor_id = ?)', [doctorID]);
+            const [reviews,] = await connection.query<Review[]>('SELECT review.*, photo_url, full_name from review join user on user.id = review.user_id where booking_id in (SELECT id from booking_doctor where doctor_id = ?)', [doctorID]);
             return reviews;
         } catch (e) {
             logger.error(e)
