@@ -64,6 +64,7 @@ export const ERRORS = {
     INVALID_AUTH_TOKEN: new RequestError("Invalid auth token", 20005, 400),
     USER_NOT_FOUND: new RequestError("User not found", 20007, 404),
     INVALID_TIME_SLOT: new RequestError("Invalid time slot", 20008, 400),
+    SMS_SENDING_FAILED: new RequestError("SMS sending failed", 20009, 500),
 
 
     INVALID_SERVICE_CATEGORY: new RequestError("Invalid service category", 30001, 400),
