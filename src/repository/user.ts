@@ -171,4 +171,15 @@ export default class UserRepository {
             throw ERRORS.DATABASE_ERROR
         }
     }
+
+    async createAdminUser(connection: PoolConnection, email: string, password_hash: string, name: string, phone_number: string): Promise<User> {
+        try {
+            const [result,] = await connection.query<ResultSetHeader>('INSERT INTO user (email_address, password_hash, full_name, phone_number, is_admin) VALUES (?, ?, ?, ?, ?)', [email, password_hash, name, phone_number, true]);
+            const [users,] = await connection.query<User[]>('SELECT * from user where id = ?', [result.insertId]);
+            return users[0];
+        } catch (e) {
+            logger.error(e)
+            throw ERRORS.DATABASE_ERROR
+        }
+    }
 }

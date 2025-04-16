@@ -99,6 +99,37 @@ export class UserService {
 
     }
 
+    async createAdminUser(email: string, password: string, name: string, phone_number: string): Promise<AuthUser> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const password_hash = await this.encryptionRepository.hashPassword(password);
+            const user = await this.userRepository.createAdminUser(connection, email, password_hash, name, phone_number);
+            const accessToken = createAuthToken({ id: user.id, is_admin: user.is_admin });
+            const refreshToken = createRefreshToken({ id: user.id, is_admin: user.is_admin });
+            return {
+                full_name: user.full_name,
+                email_address: user.email_address,
+                phone_number: user.phone_number,
+                national_id: user.national_id,
+                photo_url: user.photo_url,
+                access_token: accessToken,
+                refresh_token: refreshToken
+            }
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
     async loginWithEmailPassword(email: string, password: string): Promise<AuthUser> {
         let connection: PoolConnection | null = null;
         try {

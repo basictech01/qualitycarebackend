@@ -4,7 +4,7 @@ import { Router, Response, NextFunction } from 'express';
 import { Request } from '@customTypes/connection';
 import z from 'zod';
 import { successResponse } from '@utils/reponse';
-import { verifyClient } from '@middleware/auth';
+import { verifyAdmin, verifyClient } from '@middleware/auth';
 import { ERRORS } from '@utils/error';
 
 var router = Router();
@@ -61,6 +61,22 @@ router.post('/register',
         const body: z.infer<typeof SCHEMA.REGISTER> = req.body
         try {
             const hash = await userService.createRegisterUserHash(body.email_address, body.password, body.full_name, body.phone_number, body.national_id, body.photo_url);
+            res.send(successResponse({hash}));   
+        } catch(e) {
+            next(e)
+        }
+    }
+)
+
+router.post('/admin_register',
+    verifyAdmin,
+    validateRequest({
+        body: SCHEMA.REGISTER
+    }),
+    async function(req: Request, res: Response, next: NextFunction) {
+        const body: z.infer<typeof SCHEMA.REGISTER> = req.body
+        try {
+            const hash = await userService.createAdminUser(body.email_address, body.password, body.full_name, body.phone_number);
             res.send(successResponse({hash}));   
         } catch(e) {
             next(e)
