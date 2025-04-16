@@ -94,6 +94,7 @@ export interface BookingServiceDetails {
     user_id: number;
     user_full_name: string;
     user_email: string;
+    user_phone_number: string;
     branch_id: number;
     vat_percentage: string;
     branch_name_en: string;
@@ -119,6 +120,7 @@ export interface BookingDoctorDetails {
     id: number;
     user_id: number;
     user_full_name: string;
+    user_phone_number: string;
     user_email: string;
     booking_status: 'SCHEDULED' | 'RESCHEDULE' | 'CANCELED' | 'REFUND_INITIATED' | 'REFUND_COMPLETED' | 'COMPLETED';
     vat_percentage: string;
