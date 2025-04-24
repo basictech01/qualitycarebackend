@@ -533,4 +533,29 @@ export default class DoctorService {
         }
 
     }
+
+    async deleteDoctor(doctor_id: number): Promise<Doctor> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const doctor = await this.doctorRepository.getDoctorByIdOrNull(connection, doctor_id);
+            if (!doctor) {
+                throw ERRORS.DOCTOR_NOT_FOUND;
+            }
+            await this.doctorRepository.deleteDoctor(connection, doctor_id);
+            return doctor;
+        } catch (e) {
+            if (e instanceof RequestError) {
+                throw e;
+            } else {
+                logger.error(e);
+                throw ERRORS.INTERNAL_SERVER_ERROR;
+            }
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
+
 }

@@ -376,5 +376,18 @@ router.put('/:service_id',
     }
 )
 
+router.delete('/:service_id',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const service_id = parseInt(req.params.service_id);
+            const service = await serviceService.delete(service_id);
+            res.json(successResponse(service));
+        } catch (error) {
+            next(error);
+        }
+    }
+)
+
 
 export default router;

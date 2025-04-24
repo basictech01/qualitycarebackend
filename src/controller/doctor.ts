@@ -340,4 +340,17 @@ router.put('/:id',
     }
 )
 
+router.delete('/:id',
+    verifyAdmin,
+    async function(req: Request, res: Response, next: NextFunction) {
+        try {
+            const doctor_id = parseInt(req.params.id);
+            const doctor = await doctorService.deleteDoctor(doctor_id);
+            res.json(successResponse(doctor));
+        } catch (e) {
+            next(e);
+        }
+    }
+)
+
 export default router;

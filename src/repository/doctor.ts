@@ -340,4 +340,13 @@ export default class DoctorRepository {
         }
     }
 
+    async deleteDoctor(conn: PoolConnection, doctorId: number): Promise<void> {
+        try {
+            await conn.query('DELETE FROM doctor WHERE id = ?', [doctorId]);
+        } catch (e) {
+            logger.error(e);
+            throw e;
+        }
+    }
+
 }

@@ -570,4 +570,27 @@ export default class SettingService {
             }
         }
     }
+
+    async delete(id: number): Promise<Service> {
+        let connection: PoolConnection | null = null;
+        try {
+            connection = await pool.getConnection();
+            const service = await this.serviceRepository.getServiceByIdOrNull(connection, id);
+            if (!service) {
+                throw ERRORS.SERVICE_NOT_FOUND;
+            }
+            await this.serviceRepository.deleteService(connection, id);
+            return service;
+        } catch (error) {
+            if (error instanceof RequestError) {
+                throw error;
+            }
+            logger.error(`Error deleting service: ${error}`);
+            throw ERRORS.INTERNAL_SERVER_ERROR;
+        } finally {
+            if (connection) {
+                connection.release();
+            }
+        }
+    }
 }

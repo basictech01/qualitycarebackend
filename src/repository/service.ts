@@ -419,4 +419,12 @@ export default class ServiceRepository {
         }
     }
 
+    async deleteService(connection: PoolConnection, service_id: number): Promise<void> {
+        try {
+            await connection.query<ResultSetHeader>('DELETE FROM service WHERE id = ?', [service_id]);
+        } catch (error) {
+            logger.error(`Error deleting service: ${error}`);
+            throw ERRORS.DATABASE_ERROR;
+        }
+    }
 }
